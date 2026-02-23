@@ -1,0 +1,5 @@
+{
+  "name": "Perpus SMP Management System",
+  "description": "A comprehensive library management system for middle schools featuring student and teacher records, book cataloging, borrowing/return transactions, visit logs, and detailed Excel reports.",
+  "requestFramePermissions": []
+}
