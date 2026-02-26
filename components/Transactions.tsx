@@ -100,17 +100,17 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         <div className="bg-slate-800 p-4 md:p-6 text-white">
-          <h3 className="font-bold text-lg flex items-center gap-2">
+          <h3 className="font-bold text-base md:text-lg flex items-center gap-2">
             <Send size={20} /> Form Peminjaman Baru
           </h3>
         </div>
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="p-4 md:p-6">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <h4 className="text-xs font-bold text-blue-600 uppercase tracking-widest border-b pb-2">Data Peminjam</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Pilih Kelas</label>
                   <select 
@@ -200,7 +200,7 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
               </div>
             </div>
 
-            <div className="lg:col-span-2 pt-4">
+            <div className="md:col-span-2 pt-4">
               <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-xl shadow-blue-600/20 transition-all transform active:scale-95 flex items-center justify-center gap-2">
                 <CheckCircle size={20} /> PROSES PEMINJAMAN
               </button>
@@ -209,19 +209,19 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
           <Search size={18} /> Peminjaman Aktif (Belum Kembali)
         </h3>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-900 text-white uppercase text-[10px] font-bold">
               <tr>
-                <th className="px-6 py-4">Tgl/Jam</th>
-                <th className="px-6 py-4">Siswa</th>
-                <th className="px-6 py-4">Buku</th>
-                <th className="px-6 py-4">Jatuh Tempo</th>
-                <th className="px-6 py-4 text-center">Aksi</th>
+                <th className="px-4 py-3">Tgl/Jam</th>
+                <th className="px-4 py-3">Siswa</th>
+                <th className="px-4 py-3">Buku</th>
+                <th className="px-4 py-3">Jatuh Tempo</th>
+                <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -230,22 +230,22 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                 const isOverdue = new Date(t.tglKembali).getTime() < new Date().setHours(0,0,0,0);
                 return (
                   <tr key={t.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="font-bold text-slate-800">{t.jam}</div>
                       <div className="text-[10px] text-slate-400">{t.tglPinjam}</div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="font-bold text-slate-700">{t.siswa}</div>
                       <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-500">{t.kelas}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="font-medium text-slate-800">{t.buku}</div>
                       <div className="text-[10px] text-slate-400 italic">Oleh {t.pengarang}</div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <span className={`font-bold ${isOverdue ? 'text-red-600 animate-pulse' : 'text-slate-600'}`}>{t.tglKembali}</span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 py-3 text-center">
                       <button onClick={() => returnBook(t.id)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition transform active:scale-95">
                         KEMBALI
                       </button>
@@ -253,7 +253,7 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                   </tr>
                 );
               }) : (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">Tidak ada peminjaman aktif</td></tr>
+                <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400 italic">Tidak ada peminjaman aktif</td></tr>
               )}
             </tbody>
           </table>

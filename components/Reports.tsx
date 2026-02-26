@@ -69,30 +69,30 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-blue-100 text-center space-y-4">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-blue-100 text-center space-y-4">
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
             <FileText size={32} />
           </div>
-          <h3 className="font-bold text-lg">Laporan Peminjaman</h3>
-          <p className="text-sm text-slate-500">Unduh data buku yang sedang dipinjam (Belum Kembali).</p>
-          <button onClick={() => exportGeneral('pinjam')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-200">
+          <h3 className="font-bold text-base md:text-lg">Laporan Peminjaman</h3>
+          <p className="text-xs md:text-sm text-slate-500">Unduh data buku yang sedang dipinjam (Belum Kembali).</p>
+          <button onClick={() => exportGeneral('pinjam')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 md:py-3 rounded-lg md:rounded-xl transition shadow-lg shadow-blue-200 text-xs md:text-sm">
             DOWNLOAD EXCEL (.xlsx)
           </button>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-green-100 text-center space-y-4">
-          <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-green-100 text-center space-y-4">
+          <div className="w-14 h-14 md:w-16 md:h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
             <RefreshCw size={32} />
           </div>
-          <h3 className="font-bold text-lg">Laporan Pengembalian</h3>
-          <p className="text-sm text-slate-500">Unduh histori data buku yang sudah dikembalikan.</p>
-          <button onClick={() => exportGeneral('kembali')} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-green-200">
+          <h3 className="font-bold text-base md:text-lg">Laporan Pengembalian</h3>
+          <p className="text-xs md:text-sm text-slate-500">Unduh histori data buku yang sudah dikembalikan.</p>
+          <button onClick={() => exportGeneral('kembali')} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 md:py-3 rounded-lg md:rounded-xl transition shadow-lg shadow-green-200 text-xs md:text-sm">
             DOWNLOAD EXCEL (.xlsx)
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border p-6 md:p-8 space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
             <User size={18} /> Riwayat Per Siswa
@@ -112,15 +112,15 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
           </div>
         </div>
 
-        <div className="overflow-x-auto border rounded-2xl">
+        <div className="overflow-x-auto border rounded-xl">
            <table className="w-full text-sm text-left">
               <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
                  <tr>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Tgl/Jam</th>
-                    <th className="px-6 py-4">Siswa</th>
-                    <th className="px-6 py-4">Buku</th>
-                    <th className="px-6 py-4 text-center">Aksi</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Tgl/Jam</th>
+                    <th className="px-4 py-3">Siswa</th>
+                    <th className="px-4 py-3">Buku</th>
+                    <th className="px-4 py-3 text-center">Aksi</th>
                  </tr>
               </thead>
               <tbody className="divide-y">
@@ -135,15 +135,15 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
                           <div className="font-bold text-slate-800">{t.tglPinjam}</div>
                           {t.status === TransactionStatus.RETURNED && <div className="text-[10px] text-green-600 font-bold">Ret: {t.tglDikembalikan}</div>}
                        </td>
-                       <td className="px-6 py-4 font-bold text-slate-700">{t.siswa}</td>
-                       <td className="px-6 py-4 text-slate-500">{t.buku}</td>
-                       <td className="px-6 py-4 text-center">
+                       <td className="px-4 py-3 font-bold text-slate-700">{t.siswa}</td>
+                       <td className="px-4 py-3 text-slate-500">{t.buku}</td>
+                       <td className="px-4 py-3 text-center">
                           <button onClick={() => deleteTransaction(t.id)} className="text-red-500 hover:text-red-700 p-2 bg-red-50 rounded-lg"><Trash2 size={16} /></button>
                        </td>
                     </tr>
                  ))}
                  {filteredHistory.length === 0 && (
-                    <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">Tidak ada histori transaksi</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400 italic">Tidak ada histori transaksi</td></tr>
                  )}
               </tbody>
            </table>

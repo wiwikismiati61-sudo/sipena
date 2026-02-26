@@ -57,12 +57,12 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg border overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         <div className="bg-slate-800 p-4 md:p-6 text-white flex justify-between items-center">
-          <h3 className="font-bold text-lg flex items-center gap-2"><BookOpen size={20} /> Input Kunjungan Warta</h3>
+          <h3 className="font-bold text-base md:text-lg flex items-center gap-2"><BookOpen size={20} /> Input Kunjungan Warta</h3>
           <p className="text-xs opacity-70 italic">Mencatat penggunaan perpustakaan oleh kelas</p>
         </div>
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -96,7 +96,7 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
 
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-slate-500 mb-2 uppercase">Jam Pembelajaran (Bisa pilih multi)</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 border rounded-xl p-4 bg-slate-50">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 border rounded-lg p-3 bg-slate-50">
                 {db.jam.map(j => (
                   <label key={j.id} className={`flex items-center gap-2 p-2 rounded-md transition cursor-pointer ${formData.jam.includes(j.label) ? 'bg-blue-600 text-white' : 'bg-white border hover:bg-blue-50'}`}>
                     <input 
@@ -123,8 +123,8 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <div className="flex justify-between items-center mb-6">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h3 className="font-bold text-slate-800">Riwayat Kunjungan Warta</h3>
           <button onClick={exportVisits} className="text-[10px] font-bold bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 flex items-center gap-1">
             <Download size={14} /> EXCEL
@@ -134,29 +134,29 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
               <tr>
-                <th className="px-6 py-4">Tanggal</th>
-                <th className="px-6 py-4">Kelas</th>
-                <th className="px-6 py-4">Guru</th>
-                <th className="px-6 py-4">Mapel</th>
-                <th className="px-6 py-4">Jam</th>
-                <th className="px-6 py-4 text-center">Aksi</th>
+                <th className="px-4 py-3">Tanggal</th>
+                <th className="px-4 py-3">Kelas</th>
+                <th className="px-4 py-3">Guru</th>
+                <th className="px-4 py-3">Mapel</th>
+                <th className="px-4 py-3">Jam</th>
+                <th className="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {[...db.kunjungan].reverse().map(k => (
                 <tr key={k.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 font-medium">{k.tgl}</td>
-                  <td className="px-6 py-4"><span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">{k.kelas}</span></td>
-                  <td className="px-6 py-4 text-slate-700">{k.guru}</td>
-                  <td className="px-6 py-4 text-slate-500">{k.mapel}</td>
-                  <td className="px-6 py-4 text-[10px] text-slate-400 font-medium italic">{k.jam}</td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-4 py-3 font-medium">{k.tgl}</td>
+                  <td className="px-4 py-3"><span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">{k.kelas}</span></td>
+                  <td className="px-4 py-3 text-slate-700">{k.guru}</td>
+                  <td className="px-4 py-3 text-slate-500">{k.mapel}</td>
+                  <td className="px-4 py-3 text-[10px] text-slate-400 font-medium italic">{k.jam}</td>
+                  <td className="px-4 py-3 text-center">
                     <button onClick={() => deleteVisit(k.id)} className="text-red-500 hover:text-red-700 p-1"><Trash2 size={16} /></button>
                   </td>
                 </tr>
               ))}
               {db.kunjungan.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">Belum ada data kunjungan</td></tr>
+                <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-400 italic">Belum ada data kunjungan</td></tr>
               )}
             </tbody>
           </table>

@@ -40,22 +40,22 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white rounded-2xl shadow-xl border overflow-hidden">
-        <div className="bg-green-600 p-6 text-white flex justify-between items-center">
-          <h3 className="font-bold text-lg flex items-center gap-2"><RotateCcw size={20} /> Form Pengembalian Buku</h3>
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="bg-green-600 p-4 md:p-6 text-white flex justify-between items-center">
+          <h3 className="font-bold text-base md:text-lg flex items-center gap-2"><RotateCcw size={20} /> Form Pengembalian Buku</h3>
           <p className="text-xs opacity-80">Proses pengembalian buku pinjaman siswa</p>
         </div>
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           <form onSubmit={handleReturn} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Tanggal Kembali</label>
-                <input type="date" value={retDate} onChange={e => setRetDate(e.target.value)} className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none" required />
+                <input type="date" value={retDate} onChange={e => setRetDate(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none" required />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Kelas</label>
-                <select value={selectedKelas} onChange={e => { setSelectedKelas(e.target.value); setSelectedSiswa(''); setSelectedIds([]); }} className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none" required>
+                <select value={selectedKelas} onChange={e => { setSelectedKelas(e.target.value); setSelectedSiswa(''); setSelectedIds([]); }} className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none" required>
                   <option value="">-- Pilih Kelas --</option>
                   {uniqueKelas.map(k => <option key={k} value={k}>{k}</option>)}
                 </select>
@@ -64,7 +64,7 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
 
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Nama Siswa</label>
-              <select value={selectedSiswa} onChange={e => { setSelectedSiswa(e.target.value); setSelectedIds([]); }} disabled={!selectedKelas} className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-green-500 outline-none disabled:bg-slate-50">
+              <select value={selectedSiswa} onChange={e => { setSelectedSiswa(e.target.value); setSelectedIds([]); }} disabled={!selectedKelas} className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none disabled:bg-slate-50">
                 <option value="">-- Pilih Siswa --</option>
                 {studentsInKelas.map(s => <option key={s.id} value={s.nama}>{s.nama}</option>)}
               </select>
@@ -72,7 +72,7 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
 
             <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-500 uppercase">Daftar Buku Dipinjam:</label>
-              <div className="min-h-[150px] max-h-64 overflow-y-auto border border-dashed rounded-xl p-4 bg-slate-50 space-y-3">
+              <div className="min-h-[150px] max-h-64 overflow-y-auto border rounded-lg p-3 bg-slate-50 space-y-3">
                 {!selectedSiswa ? (
                   <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2 py-10">
                     <Info size={32} />
@@ -82,7 +82,7 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
                   borrowedBooks.map(t => {
                     const isLate = new Date() > new Date(t.tglKembali);
                     return (
-                      <label key={t.id} className={`flex items-start gap-4 p-4 rounded-xl border-2 transition cursor-pointer ${selectedIds.includes(t.id) ? 'bg-green-50 border-green-500 shadow-md' : 'bg-white border-transparent hover:border-slate-200 shadow-sm'}`}>
+                      <label key={t.id} className={`flex items-start gap-3 p-3 rounded-lg border transition cursor-pointer ${selectedIds.includes(t.id) ? 'bg-green-50 border-green-400' : 'bg-white border-slate-200 hover:border-green-300'}`}>
                         <input 
                           type="checkbox" 
                           checked={selectedIds.includes(t.id)} 
@@ -111,7 +111,7 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
               </div>
             </div>
 
-            <button type="submit" disabled={selectedIds.length === 0} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/20 transition transform active:scale-95 disabled:bg-slate-300 disabled:shadow-none">
+            <button type="submit" disabled={selectedIds.length === 0} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-600/20 transition transform active:scale-95 disabled:bg-slate-300 disabled:shadow-none">
               PROSES PENGEMBALIAN BUKU
             </button>
           </form>

@@ -109,9 +109,9 @@ const StudentVisits: React.FC<StudentVisitsProps> = ({ db, setDb }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-1">
-        <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="xl:col-span-1">
+        <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 sticky top-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
@@ -166,8 +166,8 @@ const StudentVisits: React.FC<StudentVisitsProps> = ({ db, setDb }) => {
         </div>
       </div>
 
-      <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border p-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h3 className="font-bold text-slate-800">Riwayat Kunjungan Siswa</h3>
           <button onClick={exportToExcel} className="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 flex items-center gap-1">
             <Download size={14} /> EXCEL

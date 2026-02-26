@@ -116,7 +116,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mb-4">
         {[
           { id: 'siswa', label: 'Siswa', icon: Users },
           { id: 'buku', label: 'Buku', icon: FileText },
@@ -151,20 +151,20 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto border rounded-lg max-h-[500px]">
+            <div className="overflow-x-auto border rounded-lg max-h-[500px] w-full">
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold">
                   <tr>
-                    <th className="px-6 py-3">Nama Lengkap</th>
-                    <th className="px-6 py-3">Kelas</th>
+                    <th className="px-4 py-3">Nama Lengkap</th>
+                    <th className="px-4 py-3">Kelas</th>
                     <th className="px-6 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {db.siswa.map(s => (
                     <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-3">{s.nama}</td>
-                      <td className="px-6 py-3">{s.kelas}</td>
+                      <td className="px-4 py-3">{s.nama}</td>
+                      <td className="px-4 py-3">{s.kelas}</td>
                       <td className="px-6 py-3 text-center">
                         <button onClick={() => deleteItem('siswa', s.id)} className="text-red-500 hover:text-red-700 p-1">
                           <Trash2 size={16} />
@@ -184,7 +184,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
               <h4 className="font-bold text-slate-800 mb-4 col-span-full">
                 {editingBookId ? `Mengedit Buku: ${bukuForm.judul}` : 'Tambah Buku Baru'}
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="md:col-span-1">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jenis Buku</label>
                   <select 
@@ -242,28 +242,28 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
               </div>
             </form>
 
-            <div className="overflow-x-auto border rounded-lg max-h-[400px]">
+            <div className="overflow-x-auto border rounded-lg max-h-[400px] w-full">
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold">
                   <tr>
-                    <th className="px-6 py-3">Jenis</th>
-                    <th className="px-6 py-3">Judul</th>
-                    <th className="px-6 py-3">Pengarang</th>
-                    <th className="px-6 py-3">Penerbit</th>
+                    <th className="px-4 py-3">Jenis</th>
+                    <th className="px-4 py-3">Judul</th>
+                    <th className="px-4 py-3">Pengarang</th>
+                    <th className="px-4 py-3">Penerbit</th>
                     <th className="px-6 py-3 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {db.buku.map(b => (
                     <tr key={b.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-3">
+                      <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${b.jenis === BookType.WAJIB ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                           {b.jenis}
                         </span>
                       </td>
-                      <td className="px-6 py-3 font-medium text-slate-700">{b.judul}</td>
-                      <td className="px-6 py-3 text-slate-500">{b.pengarang}</td>
-                      <td className="px-6 py-3 text-slate-500">{b.penerbit}</td>
+                      <td className="px-4 py-3 font-medium text-slate-700">{b.judul}</td>
+                      <td className="px-4 py-3 text-slate-500">{b.pengarang}</td>
+                      <td className="px-4 py-3 text-slate-500">{b.penerbit}</td>
                       <td className="px-6 py-3 text-center">
                         <div className="flex justify-center gap-2">
                           <button onClick={() => handleEditBook(b)} className="text-blue-500 hover:text-blue-700 p-1"><Edit size={16} /></button>
@@ -317,7 +317,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                   <tbody className="divide-y">
                     {(db[activeSection as keyof AppState] as any[]).map(item => (
                       <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-3 font-medium text-slate-700">{item.nama || item.label}</td>
+                        <td className="px-4 py-3 font-medium text-slate-700">{item.nama || item.label}</td>
                         <td className="px-6 py-3 text-center">
                           <button onClick={() => deleteItem(activeSection as any, item.id)} className="text-red-500 hover:text-red-700 p-1">
                             <Trash2 size={16} />

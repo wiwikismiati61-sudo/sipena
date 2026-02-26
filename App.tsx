@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('perpusDB', JSON.stringify(db));
@@ -51,7 +52,7 @@ const App: React.FC = () => {
   if (!isLoggedIn) {
     return (
       <div className="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md text-center">
           <img src="https://iili.io/KDFk4fI.png" alt="Logo" className="w-20 h-20 mx-auto mb-4 object-contain" />
           <h2 className="text-2xl font-bold text-slate-800 mb-1">System Perpustakaan SMP</h2>
           <p className="text-gray-500 text-sm mb-6">Silakan login untuk melanjutkan</p>
@@ -90,9 +91,9 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={logout} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       <main className="flex-1 flex flex-col overflow-hidden">
-        <Header activeTab={activeTab} username={db.auth.user} />
+        <Header activeTab={activeTab} username={db.auth.user} onMenuClick={() => setIsSidebarOpen(true)} />
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
           {activeTab === 'dashboard' && <Dashboard db={db} />}
           {activeTab === 'master' && <MasterData db={db} setDb={setDb} />}

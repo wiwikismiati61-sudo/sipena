@@ -61,25 +61,25 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((s, idx) => (
-          <div key={idx} className={`bg-white p-4 rounded-xl shadow-sm border border-l-4 border-${s.color}-500`}>
+          <div key={idx} className={`bg-white p-4 rounded-xl shadow-sm border-l-4 border-${s.color}-500`}>
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{s.label}</p>
-                <h3 className="text-xl font-bold text-slate-800 mt-1">{s.value}</h3>
-                {s.sub && <p className="text-[10px] text-gray-500">{s.sub}</p>}
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{s.label}</p>
+                <h3 className="text-2xl font-bold text-slate-800 mt-1">{s.value}</h3>
+                {s.sub && <p className="text-xs text-gray-500">{s.sub}</p>}
               </div>
               <div className={`p-2 bg-${s.color}-50 rounded-lg text-${s.color}-600`}>
-                <s.icon size={16} />
+                <s.icon size={20} />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden lg:col-span-2">
           <div className="p-4 border-b flex justify-between items-center bg-slate-50">
             <h3 className="font-bold text-slate-800">Top 10 Peminjam</h3>
             <button onClick={exportTopBorrowers} className="text-[10px] bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold hover:bg-blue-200">
@@ -90,20 +90,20 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
             <table className="w-full text-sm text-left">
               <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
                 <tr>
-                  <th className="px-6 py-3">Nama</th>
-                  <th className="px-6 py-3">Kelas</th>
-                  <th className="px-6 py-3 text-center">Jumlah</th>
+                  <th className="px-4 py-3">Nama</th>
+                  <th className="px-4 py-3">Kelas</th>
+                  <th className="px-4 py-3 text-center">Jumlah</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {sortedBorrowers.length > 0 ? sortedBorrowers.map(([nama, count], idx) => (
                   <tr key={idx} className="hover:bg-slate-50">
-                    <td className="px-6 py-3 font-medium text-slate-700">{nama}</td>
-                    <td className="px-6 py-3 text-slate-500">{db.siswa.find(s => s.nama === nama)?.kelas || '-'}</td>
-                    <td className="px-6 py-3 text-center font-bold text-blue-600">{count}</td>
+                    <td className="px-4 py-3 font-medium text-slate-700">{nama}</td>
+                    <td className="px-4 py-3 text-slate-500">{db.siswa.find(s => s.nama === nama)?.kelas || '-'}</td>
+                    <td className="px-4 py-3 text-center font-bold text-blue-600">{count}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-slate-400 italic">Belum ada data</td></tr>
+                  <tr><td colSpan={3} className="px-4 py-8 text-center text-slate-400 italic">Belum ada data</td></tr>
                 )}
               </tbody>
             </table>
@@ -124,20 +124,20 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
             <table className="w-full text-sm text-left">
               <thead className="bg-red-50 text-red-700 uppercase text-[10px] font-bold">
                 <tr>
-                  <th className="px-6 py-3">Nama</th>
-                  <th className="px-6 py-3">Buku</th>
-                  <th className="px-6 py-3">Deadline</th>
+                  <th className="px-4 py-3">Nama</th>
+                  <th className="px-4 py-3">Buku</th>
+                  <th className="px-4 py-3">Deadline</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-red-100">
                 {overdueList.length > 0 ? overdueList.map((t, idx) => (
                   <tr key={idx} className="bg-red-50/30 hover:bg-red-50">
-                    <td className="px-6 py-3 font-medium text-red-800">{t.siswa}</td>
-                    <td className="px-6 py-3 text-red-600 truncate max-w-[150px]">{t.buku}</td>
-                    <td className="px-6 py-3 font-bold text-red-600">{t.tglKembali}</td>
+                    <td className="px-4 py-3 font-medium text-red-800">{t.siswa}</td>
+                    <td className="px-4 py-3 text-red-600 truncate max-w-[150px]">{t.buku}</td>
+                    <td className="px-4 py-3 font-bold text-red-600">{t.tglKembali}</td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-green-600 italic">Tidak ada pinjaman terlambat</td></tr>
+                  <tr><td colSpan={3} className="px-4 py-8 text-center text-green-600 italic">Tidak ada pinjaman terlambat</td></tr>
                 )}
               </tbody>
             </table>
