@@ -58,11 +58,11 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="bg-slate-800 p-4 md:p-6 text-white flex justify-between items-center">
+        <div className="bg-slate-800 p-3 md:p-5 text-white flex justify-between items-center">
           <h3 className="font-bold text-base md:text-lg flex items-center gap-2"><BookOpen size={20} /> Input Kunjungan Warta</h3>
           <p className="text-xs opacity-70 italic">Mencatat penggunaan perpustakaan oleh kelas</p>
         </div>
-        <div className="p-4 md:p-6">
+        <div className="p-3 md:p-5">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
@@ -123,7 +123,7 @@ const Visits: React.FC<VisitsProps> = ({ db, setDb }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6">
+      <div className="bg-white rounded-xl shadow-sm border p-3 md:p-5">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h3 className="font-bold text-slate-800">Riwayat Kunjungan Warta</h3>
           <button onClick={exportVisits} className="text-[10px] font-bold bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 flex items-center gap-1">

@@ -42,11 +42,11 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="bg-green-600 p-4 md:p-6 text-white flex justify-between items-center">
+        <div className="bg-green-600 p-3 md:p-5 text-white flex justify-between items-center">
           <h3 className="font-bold text-base md:text-lg flex items-center gap-2"><RotateCcw size={20} /> Form Pengembalian Buku</h3>
           <p className="text-xs opacity-80">Proses pengembalian buku pinjaman siswa</p>
         </div>
-        <div className="p-4 md:p-8">
+        <div className="p-3 md:p-5">
           <form onSubmit={handleReturn} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>

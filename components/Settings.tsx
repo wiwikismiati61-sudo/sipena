@@ -62,8 +62,8 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <div className="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
-        <h3 className="font-bold text-xl text-slate-800 flex items-center gap-3">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
+        <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
           <Shield className="text-blue-600" /> Keamanan Akun
         </h3>
         <form onSubmit={handleSecuritySave} className="space-y-4">
@@ -74,7 +74,7 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
                 type="text" 
                 value={authForm.user}
                 onChange={e => setAuthForm({ ...authForm, user: e.target.value })}
-                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none" 
+                className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                 required 
               />
             </div>
@@ -84,19 +84,19 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
                 type="password" 
                 value={authForm.pass}
                 onChange={e => setAuthForm({ ...authForm, pass: e.target.value })}
-                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none" 
+                className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
                 required 
               />
             </div>
           </div>
-          <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-xl transition shadow-lg flex items-center gap-2">
+          <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-lg flex items-center gap-2 text-sm">
             <Save size={18} /> SIMPAN PERUBAHAN
           </button>
         </form>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border p-8 space-y-6">
-        <h3 className="font-bold text-xl text-slate-800 flex items-center gap-3">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
+        <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
           <Database className="text-indigo-600" /> Database & Backup
         </h3>
         <p className="text-sm text-slate-500 leading-relaxed">
@@ -105,11 +105,11 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <button onClick={backupData} className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-2xl font-bold shadow-lg transition transform active:scale-95">
+          <button onClick={backupData} className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-bold shadow-lg transition transform active:scale-95 text-sm">
             <Download size={20} /> DOWNLOAD BACKUP (JSON)
           </button>
           
-          <label className="flex-1 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white py-4 px-6 rounded-2xl font-bold shadow-lg transition cursor-pointer transform active:scale-95">
+          <label className="flex-1 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white py-3 px-4 rounded-xl font-bold shadow-lg transition cursor-pointer transform active:scale-95 text-sm">
             <Upload size={20} /> RESTORE DATABASE
             <input type="file" className="hidden" accept=".json" onChange={restoreData} />
           </label>

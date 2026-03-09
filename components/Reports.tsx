@@ -69,7 +69,7 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-blue-100 text-center space-y-4">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-blue-100 text-center space-y-4">
           <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
             <FileText size={32} />
           </div>
@@ -80,7 +80,7 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
           </button>
         </div>
 
-        <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-green-100 text-center space-y-4">
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-green-100 text-center space-y-4">
           <div className="w-14 h-14 md:w-16 md:h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
             <RefreshCw size={32} />
           </div>
@@ -92,7 +92,7 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-6">
+      <div className="bg-white rounded-xl shadow-sm border p-3 md:p-5 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
             <User size={18} /> Riwayat Per Siswa
