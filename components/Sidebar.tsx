@@ -8,7 +8,9 @@ import {
   Users, 
   UserSquare,
   FileSpreadsheet, 
-  Settings 
+  Settings,
+  LogOut,
+  LogIn
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -16,9 +18,11 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  isLoggedIn: boolean;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setIsOpen, isLoggedIn, onLogout }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'master', label: 'Master Data', icon: Database },
@@ -66,6 +70,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setI
           </button>
         ))}
       </nav>
+
+      <div className="p-3 lg:p-4 border-t border-slate-700">
+        {isLoggedIn ? (
+          <button 
+            onClick={onLogout}
+            className="w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-[13px] lg:text-sm font-medium transition active:scale-95"
+          >
+            <LogOut size={16} />
+            <span className="hidden lg:block">Logout</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => handleSelect('master')}
+            className="w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-[13px] lg:text-sm font-medium transition active:scale-95"
+          >
+            <LogIn size={16} />
+            <span className="hidden lg:block">Login</span>
+          </button>
+        )}
+      </div>
     </aside>
     </>
   );

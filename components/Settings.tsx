@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { AppState } from '../types';
 import { DEFAULT_STATE } from '../constants';
-import { Database, Download, Upload, AlertTriangle } from 'lucide-react';
+import { Shield, Database, Download, Upload, Save, AlertTriangle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface SettingsProps {
@@ -11,6 +11,14 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
+  const [authForm, setAuthForm] = useState({ user: db.auth.user, pass: db.auth.pass });
+
+  const handleSecuritySave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDb(prev => ({ ...prev, auth: authForm }));
+    Swal.fire('Sukses', 'Informasi login telah diperbarui', 'success');
+  };
+
   const backupData = () => {
     const blob = new Blob([JSON.stringify(db)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -54,6 +62,39 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
+        <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
+          <Shield className="text-blue-600" /> Keamanan Akun
+        </h3>
+        <form onSubmit={handleSecuritySave} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Username Administrator</label>
+              <input 
+                type="text" 
+                value={authForm.user}
+                onChange={e => setAuthForm({ ...authForm, user: e.target.value })}
+                className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                required 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Password Baru</label>
+              <input 
+                type="password" 
+                value={authForm.pass}
+                onChange={e => setAuthForm({ ...authForm, pass: e.target.value })}
+                className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                required 
+              />
+            </div>
+          </div>
+          <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-lg flex items-center gap-2 text-sm">
+            <Save size={18} /> SIMPAN PERUBAHAN
+          </button>
+        </form>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
         <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
           <Database className="text-indigo-600" /> Database & Backup
