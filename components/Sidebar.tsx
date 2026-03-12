@@ -8,19 +8,17 @@ import {
   Users, 
   UserSquare,
   FileSpreadsheet, 
-  Settings, 
-  LogOut 
+  Settings 
 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  onLogout: () => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'master', label: 'Master Data', icon: Database },
@@ -68,17 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLogout, is
           </button>
         ))}
       </nav>
-
-      <div className="p-3 lg:p-4 border-t border-slate-700">
-                <button 
-          onClick={onLogout}
-          className="w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-[13px] lg:text-sm font-medium transition active:scale-95"
-        >
-          <LogOut size={16} />
-                    <span className="hidden lg:block">Logout</span>
-        </button>
-      </div>
-          </aside>
+    </aside>
     </>
   );
 };
