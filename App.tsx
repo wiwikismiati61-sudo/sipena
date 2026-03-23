@@ -14,7 +14,7 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Swal from 'sweetalert2';
 import { auth, db as firestoreDb } from './firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const App: React.FC = () => {
@@ -82,7 +82,20 @@ const App: React.FC = () => {
         Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
       }
     } catch (error: any) {
-      Swal.fire({ icon: 'error', title: isRegistering ? 'Pendaftaran Gagal' : 'Login Gagal', text: error.message });
+      Swal.fire({ icon: 'error', title: isRegistering ? 'Pendaftaran Gagal' : 'Login Gagal', text: `Firebase: Error (${error.code}).` });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!loginForm.email) {
+      Swal.fire({ icon: 'warning', title: 'Email Kosong', text: 'Masukkan email Anda terlebih dahulu di kolom email untuk mereset password.' });
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, loginForm.email);
+      Swal.fire({ icon: 'success', title: 'Email Terkirim', text: 'Link reset password telah dikirim ke email Anda. Silakan cek kotak masuk/spam.' });
+    } catch (error: any) {
+      Swal.fire({ icon: 'error', title: 'Gagal Mengirim Email', text: `Firebase: Error (${error.code}).` });
     }
   };
 
@@ -140,6 +153,11 @@ const App: React.FC = () => {
               <button type="button" onClick={() => setIsRegistering(!isRegistering)} className="text-blue-600 hover:underline">
                 {isRegistering ? 'Sudah punya akun? Login' : 'Belum punya akun? Daftar'}
               </button>
+              {!isRegistering && (
+                <button type="button" onClick={handleResetPassword} className="text-slate-500 hover:text-slate-700 hover:underline">
+                  Lupa Password?
+                </button>
+              )}
             </div>
             <button type="button" onClick={() => setActiveTab('dashboard')} className="w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg transition transform active:scale-95">
               Kembali ke Dashboard

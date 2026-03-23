@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { AppState } from '../types';
 import { DEFAULT_STATE } from '../constants';
-import { Database, Download, Upload, AlertTriangle } from 'lucide-react';
+import { Database, Download, Upload, AlertTriangle, Shield, Save } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { auth } from '../firebase';
+import { updatePassword } from 'firebase/auth';
 
 interface SettingsProps {
   db: AppState;
@@ -11,6 +13,32 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
+  const [newPassword, setNewPassword] = useState('');
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+      Swal.fire('Error', 'Anda harus login untuk mengubah password', 'error');
+      return;
+    }
+    if (newPassword.length < 6) {
+      Swal.fire('Peringatan', 'Password minimal 6 karakter', 'warning');
+      return;
+    }
+    try {
+      await updatePassword(auth.currentUser, newPassword);
+      setNewPassword('');
+      Swal.fire('Sukses', 'Password berhasil diubah', 'success');
+    } catch (error: any) {
+      console.error("Change password error", error);
+      if (error.code === 'auth/requires-recent-login') {
+        Swal.fire('Gagal', 'Sesi Anda sudah terlalu lama. Silakan logout dan login kembali sebelum mengubah password.', 'error');
+      } else {
+        Swal.fire('Gagal', `Gagal mengubah password: ${error.message}`, 'error');
+      }
+    }
+  };
+
   const backupData = () => {
     const blob = new Blob([JSON.stringify(db)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -54,6 +82,40 @@ const Settings: React.FC<SettingsProps> = ({ db, setDb }) => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
+        <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
+          <Shield className="text-blue-600" /> Keamanan Akun
+        </h3>
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Email Anda</label>
+              <input 
+                type="email" 
+                value={auth.currentUser?.email || ''}
+                className="w-full border rounded-lg p-2.5 text-sm bg-slate-100 text-slate-500 outline-none cursor-not-allowed" 
+                disabled 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Password Baru</label>
+              <input 
+                type="password" 
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                placeholder="Minimal 6 karakter"
+                required 
+                minLength={6}
+              />
+            </div>
+          </div>
+          <button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-lg flex items-center gap-2 text-sm">
+            <Save size={18} /> UBAH PASSWORD
+          </button>
+        </form>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border p-4 md:p-6 space-y-4 md:space-y-6">
         <h3 className="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-3">
           <Database className="text-indigo-600" /> Database & Backup
