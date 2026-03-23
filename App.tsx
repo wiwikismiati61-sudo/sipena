@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppState } from './types';
 import { DEFAULT_STATE } from './constants';
 import Sidebar from './components/Sidebar';
@@ -13,42 +13,92 @@ import StudentVisits from './components/StudentVisits';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Swal from 'sweetalert2';
+import { auth, db as firestoreDb } from './firebase';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const App: React.FC = () => {
-  const [db, setDb] = useState<AppState>(() => {
-    const saved = localStorage.getItem('perpusDB');
-    if (saved) {
-      const savedState = JSON.parse(saved);
-      // Merge with default state to ensure all keys are present, preventing errors on data structure updates.
-      return { ...DEFAULT_STATE, ...savedState };
-    }
-    return DEFAULT_STATE;
-  });
-
+  const [db, setDbState] = useState<AppState>(DEFAULT_STATE);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [loginForm, setLoginForm] = useState({ email: '', pass: '' });
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('perpusDB', JSON.stringify(db));
-  }, [db]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+      setCurrentUserEmail(user?.email || null);
+      setIsAuthReady(true);
+    });
+    return unsubscribe;
+  }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!isAuthReady) return;
+    
+    const docRef = doc(firestoreDb, 'schoolData', 'main');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as AppState;
+        setDbState({ ...DEFAULT_STATE, ...data });
+      } else {
+        // Initialize with default state if not exists
+        if (isLoggedIn) {
+          setDoc(docRef, DEFAULT_STATE).catch(console.error);
+        }
+      }
+    }, (error) => {
+      console.error("Firestore Error: ", error);
+    });
+
+    return unsubscribe;
+  }, [isAuthReady, isLoggedIn]);
+
+  const setDb = useCallback((action: React.SetStateAction<AppState>) => {
+    setDbState(prev => {
+      const nextState = typeof action === 'function' ? action(prev) : action;
+      if (isLoggedIn) {
+        const docRef = doc(firestoreDb, 'schoolData', 'main');
+        setDoc(docRef, nextState).catch(err => {
+          console.error("Error writing to Firestore:", err);
+          Swal.fire('Error', 'Gagal menyimpan data ke database', 'error');
+        });
+      }
+      return nextState;
+    });
+  }, [isLoggedIn]);
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginForm.user === db.auth.user && loginForm.pass === db.auth.pass) {
-      setIsLoggedIn(true);
-      Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
-    } else {
-      Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'Username atau Password salah!' });
+    try {
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, loginForm.email, loginForm.pass);
+        Swal.fire({ icon: 'success', title: 'Pendaftaran Berhasil', timer: 1500, showConfirmButton: false });
+      } else {
+        await signInWithEmailAndPassword(auth, loginForm.email, loginForm.pass);
+        Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
+      }
+    } catch (error: any) {
+      Swal.fire({ icon: 'error', title: isRegistering ? 'Pendaftaran Gagal' : 'Login Gagal', text: error.message });
     }
   };
 
-  const logout = () => {
-    setIsLoggedIn(false);
-    setLoginForm({ user: '', pass: '' });
-    setActiveTab('dashboard');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setLoginForm({ email: '', pass: '' });
+      setActiveTab('dashboard');
+    } catch (error) {
+      console.error("Logout error", error);
+    }
   };
+
+  if (!isAuthReady) {
+    return <div className="flex h-screen items-center justify-center bg-slate-50">Loading...</div>;
+  }
 
   if (!isLoggedIn && activeTab !== 'dashboard') {
     return (
@@ -56,16 +106,18 @@ const App: React.FC = () => {
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md text-center">
           <img src="https://iili.io/KDFk4fI.png" alt="Logo" className="w-20 h-20 mx-auto mb-4 object-contain" />
           <h2 className="text-2xl font-bold text-slate-800 mb-1">System Perpustakaan SMP</h2>
-          <p className="text-gray-500 text-sm mb-6">Silakan login untuk mengakses menu ini</p>
-          <form onSubmit={handleLogin} className="space-y-4 text-left">
+          <p className="text-gray-500 text-sm mb-6">
+            {isRegistering ? 'Daftar akun baru untuk guru' : 'Silakan login untuk mengakses menu ini'}
+          </p>
+          <form onSubmit={handleAuth} className="space-y-4 text-left">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input 
-                type="text" 
-                value={loginForm.user}
-                onChange={(e) => setLoginForm({ ...loginForm, user: e.target.value })}
+                type="email" 
+                value={loginForm.email}
+                onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
-                placeholder="Username" 
+                placeholder="email@sekolah.com" 
                 required 
               />
             </div>
@@ -76,18 +128,23 @@ const App: React.FC = () => {
                 value={loginForm.pass}
                 onChange={(e) => setLoginForm({ ...loginForm, pass: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
-                placeholder="Password" 
+                placeholder="Password (min 6 karakter)" 
                 required 
+                minLength={6}
               />
             </div>
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg transform active:scale-95">
-              Masuk Aplikasi
+              {isRegistering ? 'Daftar Sekarang' : 'Masuk Aplikasi'}
             </button>
+            <div className="flex justify-between items-center text-sm mt-4">
+              <button type="button" onClick={() => setIsRegistering(!isRegistering)} className="text-blue-600 hover:underline">
+                {isRegistering ? 'Sudah punya akun? Login' : 'Belum punya akun? Daftar'}
+              </button>
+            </div>
             <button type="button" onClick={() => setActiveTab('dashboard')} className="w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg transition transform active:scale-95">
               Kembali ke Dashboard
             </button>
           </form>
-          <p className="mt-4 text-xs text-gray-400 italic">Default: admin / admin</p>
         </div>
       </div>
     );
@@ -97,7 +154,7 @@ const App: React.FC = () => {
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} isLoggedIn={isLoggedIn} onLogout={logout} />
       <main className="flex-1 flex flex-col overflow-hidden">
-        <Header activeTab={activeTab} username={db.auth.user} onMenuClick={() => setIsSidebarOpen(true)} />
+        <Header activeTab={activeTab} username={currentUserEmail || 'Guest'} onMenuClick={() => setIsSidebarOpen(true)} />
         <div className="flex-1 overflow-y-auto p-3 md:p-5">
           {activeTab === 'dashboard' && <Dashboard db={db} />}
           {activeTab === 'master' && <MasterData db={db} setDb={setDb} />}
