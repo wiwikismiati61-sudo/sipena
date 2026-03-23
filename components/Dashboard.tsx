@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppState, TransactionStatus } from '../types';
 import { Users, UserCheck, BookOpen, CheckCircle, PieChart, Download, AlertCircle, UserSquare } from 'lucide-react';
 import * as XLSX from 'xlsx';
@@ -10,6 +10,9 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ db }) => {
+  const [filterKelas, setFilterKelas] = useState('');
+  const [filterNama, setFilterNama] = useState('');
+
   const activeLoans = db.transaksi.filter(t => t.status === TransactionStatus.BORROWED);
   const returnedLoans = db.transaksi.filter(t => t.status === TransactionStatus.RETURNED);
   
@@ -58,6 +61,12 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
     { label: 'Dipinjam', value: activeLoans.length, sub: `${new Set(activeLoans.map(t => t.siswa)).size} Siswa`, icon: BookOpen, color: 'orange' },
     { label: 'Partisipasi', value: `${percentage}%`, icon: PieChart, color: 'indigo' },
   ];
+
+  const filteredTransactions = db.transaksi.filter(t => {
+    const matchKelas = t.kelas.toLowerCase().includes(filterKelas.toLowerCase());
+    const matchNama = t.siswa.toLowerCase().includes(filterNama.toLowerCase());
+    return matchKelas && matchNama;
+  }).sort((a, b) => new Date(b.tglPinjam).getTime() - new Date(a.tglPinjam).getTime());
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -142,6 +151,64 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      {/* Riwayat Peminjaman & Pengembalian */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 border-b bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h3 className="font-bold text-slate-800 flex items-center">
+            <BookOpen size={18} className="mr-2 text-blue-600" />
+            Riwayat Peminjaman & Pengembalian
+          </h3>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <input 
+              type="text" 
+              placeholder="Filter Kelas..." 
+              value={filterKelas}
+              onChange={e => setFilterKelas(e.target.value)}
+              className="px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-40"
+            />
+            <input 
+              type="text" 
+              placeholder="Filter Nama Siswa..." 
+              value={filterNama}
+              onChange={e => setFilterNama(e.target.value)}
+              className="px-3 py-1.5 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-48"
+            />
+          </div>
+        </div>
+        <div className="overflow-x-auto max-h-96">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold sticky top-0 shadow-sm">
+              <tr>
+                <th className="px-4 py-3">Nama Siswa</th>
+                <th className="px-4 py-3">Kelas</th>
+                <th className="px-4 py-3">Buku</th>
+                <th className="px-4 py-3">Tgl Pinjam</th>
+                <th className="px-4 py-3">Tgl Pengembalian</th>
+                <th className="px-4 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredTransactions.length > 0 ? filteredTransactions.map((t, idx) => (
+                <tr key={idx} className="hover:bg-slate-50">
+                  <td className="px-4 py-3 font-medium text-slate-700">{t.siswa}</td>
+                  <td className="px-4 py-3 text-slate-500">{t.kelas}</td>
+                  <td className="px-4 py-3 text-slate-600 truncate max-w-[200px]">{t.buku}</td>
+                  <td className="px-4 py-3 text-slate-600">{t.tglPinjam}</td>
+                  <td className="px-4 py-3 text-slate-600">{t.status === TransactionStatus.RETURNED ? t.tglDikembalikan : '-'}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${t.status === TransactionStatus.RETURNED ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {t.status === TransactionStatus.RETURNED ? 'KEMBALI' : 'DIPINJAM'}
+                    </span>
+                  </td>
+                </tr>
+              )) : (
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">Tidak ada data yang sesuai filter</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
