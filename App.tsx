@@ -14,7 +14,7 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Swal from 'sweetalert2';
 import { auth, db as firestoreDb } from './firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const App: React.FC = () => {
@@ -82,7 +82,21 @@ const App: React.FC = () => {
         Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
       }
     } catch (error: any) {
-      Swal.fire({ icon: 'error', title: isRegistering ? 'Pendaftaran Gagal' : 'Login Gagal', text: `Firebase: Error (${error.code}).` });
+      let message = `Firebase: Error (${error.code}).`;
+      if (error.code === 'auth/invalid-credential') {
+        message = 'Email atau Password salah. Silakan periksa kembali atau gunakan Lupa Password.';
+      }
+      Swal.fire({ icon: 'error', title: isRegistering ? 'Pendaftaran Gagal' : 'Login Gagal', text: message });
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
+    } catch (error: any) {
+      Swal.fire({ icon: 'error', title: 'Login Gagal', text: `Firebase: Error (${error.code}).` });
     }
   };
 
@@ -149,6 +163,16 @@ const App: React.FC = () => {
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition shadow-lg transform active:scale-95">
               {isRegistering ? 'Daftar Sekarang' : 'Masuk Aplikasi'}
             </button>
+            {!isRegistering && (
+              <button 
+                type="button" 
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg transition shadow-sm"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                Masuk dengan Google
+              </button>
+            )}
             <div className="flex justify-between items-center text-sm mt-4">
               <button type="button" onClick={() => setIsRegistering(!isRegistering)} className="text-blue-600 hover:underline">
                 {isRegistering ? 'Sudah punya akun? Login' : 'Belum punya akun? Daftar'}
