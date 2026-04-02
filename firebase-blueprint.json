@@ -1,160 +1,132 @@
 {
   "entities": {
-    "Student": {
-      "title": "Student",
-      "description": "Represents a student in the school",
+    "Siswa": {
+      "title": "Siswa",
+      "description": "Data siswa perpustakaan",
       "type": "object",
       "properties": {
-        "nama": { "type": "string", "description": "Student's full name" },
-        "kelas": { "type": "string", "description": "Student's class" }
+        "id": { "type": "string" },
+        "nama": { "type": "string" },
+        "kelas": { "type": "string" }
       },
-      "required": ["nama", "kelas"]
+      "required": ["id", "nama", "kelas"]
     },
-    "Teacher": {
-      "title": "Teacher",
-      "description": "Represents a teacher in the school",
+    "Guru": {
+      "title": "Guru",
+      "description": "Data guru perpustakaan",
       "type": "object",
       "properties": {
-        "nama": { "type": "string", "description": "Teacher's full name" }
+        "id": { "type": "string" },
+        "nama": { "type": "string" }
       },
-      "required": ["nama"]
+      "required": ["id", "nama"]
     },
-    "Subject": {
-      "title": "Subject",
-      "description": "Represents a subject taught in the school",
+    "Buku": {
+      "title": "Buku",
+      "description": "Data buku perpustakaan",
       "type": "object",
       "properties": {
-        "nama": { "type": "string", "description": "Subject name" }
+        "id": { "type": "string" },
+        "no": { "type": "number" },
+        "judul": { "type": "string" },
+        "jenis": { "type": "string" },
+        "edisi": { "type": "string" },
+        "isbn_issn": { "type": "string" },
+        "penerbit": { "type": "string" },
+        "tahun": { "type": "string" },
+        "kolasi": { "type": "string" },
+        "judul_seri": { "type": "string" },
+        "nomor_panggil": { "type": "string" },
+        "bahasa_buku": { "type": "string" },
+        "kota_terbit": { "type": "string" },
+        "nomor_kelas": { "type": "string" },
+        "catatan": { "type": "string" },
+        "penanggung_jawab": { "type": "string" },
+        "pengarang": { "type": "string" },
+        "subjek": { "type": "string" },
+        "kode_eksemplar": { "type": "string" }
       },
-      "required": ["nama"]
+      "required": ["id", "judul", "kode_eksemplar"]
     },
-    "LessonHour": {
-      "title": "LessonHour",
-      "description": "Represents a lesson hour period",
+    "Transaksi": {
+      "title": "Transaksi",
+      "description": "Data transaksi peminjaman dan pengembalian",
       "type": "object",
       "properties": {
-        "label": { "type": "string", "description": "Lesson hour label" }
+        "id": { "type": "string" },
+        "tglPinjam": { "type": "string" },
+        "jam": { "type": "string" },
+        "siswa": { "type": "string" },
+        "kelas": { "type": "string" },
+        "buku": { "type": "string" },
+        "subjek": { "type": "string" },
+        "kode_eksemplar": { "type": "string" },
+        "jenis": { "type": "string" },
+        "pengarang": { "type": "string" },
+        "penerbit": { "type": "string" },
+        "tglKembali": { "type": "string" },
+        "status": { "type": "string" },
+        "tglDikembalikan": { "type": "string" }
       },
-      "required": ["label"]
+      "required": ["id", "siswa", "buku", "status"]
     },
-    "Book": {
-      "title": "Book",
-      "description": "Represents a book in the library",
+    "Kunjungan": {
+      "title": "Kunjungan",
+      "description": "Data kunjungan kelas",
       "type": "object",
       "properties": {
-        "no": { "type": "integer", "description": "Automatic sequence number" },
-        "judul": { "type": "string", "description": "Book title" },
-        "jenis": { "type": "string", "description": "Type of book" },
-        "edisi": { "type": "string", "description": "Book edition" },
-        "isbn_issn": { "type": "string", "description": "ISBN or ISSN number" },
-        "penerbit": { "type": "string", "description": "Book publisher" },
-        "tahun": { "type": "string", "description": "Year of publication" },
-        "kolasi": { "type": "string", "description": "Collation (physical description)" },
-        "judul_seri": { "type": "string", "description": "Series title" },
-        "nomor_panggil": { "type": "string", "description": "Call number" },
-        "bahasa_buku": { "type": "string", "description": "Book language" },
-        "kota_terbit": { "type": "string", "description": "City of publication" },
-        "nomor_kelas": { "type": "string", "description": "Class number (DDC)" },
-        "catatan": { "type": "string", "description": "Notes" },
-        "penanggung_jawab": { "type": "string", "description": "Person in charge" },
-        "pengarang": { "type": "string", "description": "Book author" },
-        "subjek": { "type": "string", "description": "Subject" },
-        "kode_eksemplar": { "type": "string", "description": "Exemplar code" }
+        "id": { "type": "string" },
+        "tgl": { "type": "string" },
+        "kelas": { "type": "string" },
+        "guru": { "type": "string" },
+        "mapel": { "type": "string" },
+        "jam": { "type": "string" }
       },
-      "required": ["judul"]
+      "required": ["id", "tgl", "kelas"]
     },
-    "Transaction": {
-      "title": "Transaction",
-      "description": "Represents a book borrowing transaction",
+    "KunjunganSiswa": {
+      "title": "KunjunganSiswa",
+      "description": "Data kunjungan siswa mandiri",
       "type": "object",
       "properties": {
-        "tglPinjam": { "type": "string", "description": "Borrow date" },
-        "jam": { "type": "string", "description": "Time of transaction" },
-        "siswa": { "type": "string", "description": "Student name" },
-        "kelas": { "type": "string", "description": "Student class" },
-        "buku": { "type": "string", "description": "Book title" },
-        "jenis": { "type": "string", "enum": ["Wajib", "Umum"], "description": "Type of book" },
-        "pengarang": { "type": "string", "description": "Book author" },
-        "penerbit": { "type": "string", "description": "Book publisher" },
-        "tglKembali": { "type": "string", "description": "Expected return date" },
-        "status": { "type": "string", "enum": ["borrowed", "returned"], "description": "Transaction status" },
-        "tglDikembalikan": { "type": "string", "description": "Actual return date" }
+        "id": { "type": "string" },
+        "tgl": { "type": "string" },
+        "jam": { "type": "string" },
+        "kelas": { "type": "string" },
+        "nama": { "type": "string" },
+        "keperluan": { "type": "string" }
       },
-      "required": ["tglPinjam", "jam", "siswa", "kelas", "buku", "jenis", "pengarang", "penerbit", "tglKembali", "status", "tglDikembalikan"]
+      "required": ["id", "tgl", "nama"]
     },
-    "Visit": {
-      "title": "Visit",
-      "description": "Represents a class visit to the library",
+    "Mapel": {
+      "title": "Mapel",
+      "description": "Data mata pelajaran",
       "type": "object",
       "properties": {
-        "tgl": { "type": "string", "description": "Date of visit" },
-        "kelas": { "type": "string", "description": "Class" },
-        "guru": { "type": "string", "description": "Teacher name" },
-        "mapel": { "type": "string", "description": "Subject" },
-        "jam": { "type": "string", "description": "Lesson hour" }
+        "id": { "type": "string" },
+        "nama": { "type": "string" }
       },
-      "required": ["tgl", "kelas", "guru", "mapel", "jam"]
+      "required": ["id", "nama"]
     },
-    "StudentVisit": {
-      "title": "StudentVisit",
-      "description": "Represents an individual student visit to the library",
+    "Jam": {
+      "title": "Jam",
+      "description": "Data jam pelajaran",
       "type": "object",
       "properties": {
-        "tgl": { "type": "string", "description": "Date of visit" },
-        "jam": { "type": "string", "description": "Time of visit" },
-        "kelas": { "type": "string", "description": "Student class" },
-        "nama": { "type": "string", "description": "Student name" },
-        "keperluan": { "type": "string", "description": "Purpose of visit" }
+        "id": { "type": "string" },
+        "label": { "type": "string" }
       },
-      "required": ["tgl", "jam", "kelas", "nama", "keperluan"]
-    },
-    "User": {
-      "title": "User",
-      "description": "Represents an authenticated user/librarian",
-      "type": "object",
-      "properties": {
-        "email": { "type": "string", "description": "User email" },
-        "role": { "type": "string", "enum": ["admin", "librarian"], "description": "User role" }
-      },
-      "required": ["email", "role"]
+      "required": ["id", "label"]
     }
   },
   "firestore": {
-    "/siswa/{siswaId}": {
-      "schema": { "$ref": "#/entities/Student" },
-      "description": "Collection of students"
-    },
-    "/guru/{guruId}": {
-      "schema": { "$ref": "#/entities/Teacher" },
-      "description": "Collection of teachers"
-    },
-    "/mapel/{mapelId}": {
-      "schema": { "$ref": "#/entities/Subject" },
-      "description": "Collection of subjects"
-    },
-    "/jam/{jamId}": {
-      "schema": { "$ref": "#/entities/LessonHour" },
-      "description": "Collection of lesson hours"
-    },
-    "/buku/{bukuId}": {
-      "schema": { "$ref": "#/entities/Book" },
-      "description": "Collection of books"
-    },
-    "/transaksi/{transaksiId}": {
-      "schema": { "$ref": "#/entities/Transaction" },
-      "description": "Collection of transactions"
-    },
-    "/kunjungan/{kunjunganId}": {
-      "schema": { "$ref": "#/entities/Visit" },
-      "description": "Collection of class visits"
-    },
-    "/kunjunganSiswa/{kunjunganSiswaId}": {
-      "schema": { "$ref": "#/entities/StudentVisit" },
-      "description": "Collection of student visits"
-    },
-    "/users/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
-      "description": "Collection of authenticated users"
-    }
+    "/siswa/{siswaId}": { "schema": { "$ref": "Siswa" }, "description": "Koleksi data siswa" },
+    "/guru/{guruId}": { "schema": { "$ref": "Guru" }, "description": "Koleksi data guru" },
+    "/buku/{bukuId}": { "schema": { "$ref": "Buku" }, "description": "Koleksi data buku" },
+    "/transaksi/{transaksiId}": { "schema": { "$ref": "Transaksi" }, "description": "Koleksi data transaksi" },
+    "/kunjungan/{kunjunganId}": { "schema": { "$ref": "Kunjungan" }, "description": "Koleksi data kunjungan kelas" },
+    "/kunjunganSiswa/{kunjunganSiswaId}": { "schema": { "$ref": "KunjunganSiswa" }, "description": "Koleksi data kunjungan siswa" },
+    "/mapel/{mapelId}": { "schema": { "$ref": "Mapel" }, "description": "Koleksi data mata pelajaran" },
+    "/jam/{jamId}": { "schema": { "$ref": "Jam" }, "description": "Koleksi data jam pelajaran" }
   }
 }

@@ -38,20 +38,24 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
             const newData: Student[] = json.slice(1)
               .filter(row => row[0] && row[1])
               .map((row, i) => ({ id: `S-${Date.now()}-${i}`, nama: String(row[0]), kelas: String(row[1]) }));
+            
+            // For granular sync, we need to be careful with overwriting.
+            // The current setDb logic in App.tsx only handles doc updates/creates.
+            // To "overwrite", we'd ideally delete all first.
             setDb(prev => ({ ...prev, siswa: newData }));
-            Swal.fire('Import Berhasil', `${newData.length} siswa diimpor (data lama dihapus).`, 'success');
+            Swal.fire('Import Berhasil', `${newData.length} siswa diimpor.`, 'success');
           } else if (type === 'guru') {
             const newData: Teacher[] = json.slice(1)
               .filter(row => row[0])
               .map((row, i) => ({ id: `G-${Date.now()}-${i}`, nama: String(row[0]) }));
             setDb(prev => ({ ...prev, guru: newData }));
-            Swal.fire('Import Berhasil', `${newData.length} guru diimpor (data lama dihapus).`, 'success');
+            Swal.fire('Import Berhasil', `${newData.length} guru diimpor.`, 'success');
           } else if (type === 'mapel') {
             const newData: Subject[] = json.slice(1)
               .filter(row => row[0])
               .map((row, i) => ({ id: `M-${Date.now()}-${i}`, nama: String(row[0]) }));
             setDb(prev => ({ ...prev, mapel: newData }));
-            Swal.fire('Import Berhasil', `${newData.length} mapel diimpor (data lama dihapus).`, 'success');
+            Swal.fire('Import Berhasil', `${newData.length} mapel diimpor.`, 'success');
           } else if (type === 'buku') {
             const newData: Book[] = json.slice(1)
               .filter(row => row[0]) // Judul must exist
@@ -77,7 +81,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 kode_eksemplar: String(row[16] || ''),
               }));
             setDb(prev => ({ ...prev, buku: newData }));
-            Swal.fire('Import Berhasil', `${newData.length} buku diimpor (data lama dihapus).`, 'success');
+            Swal.fire('Import Berhasil', `${newData.length} buku diimpor.`, 'success');
           }
         };
         reader.readAsArrayBuffer(file);
@@ -146,6 +150,11 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
       confirmButtonText: 'Hapus'
     }).then(result => {
       if (result.isConfirmed) {
+        // Explicitly delete from Firestore first to ensure it's gone
+        import('../firebase').then(({ deleteDoc, doc, db: firestoreDb }) => {
+          deleteDoc(doc(firestoreDb, type as string, id)).catch(console.error);
+        });
+
         setDb(prev => ({
           ...prev,
           [type]: (prev[type] as any[]).filter((item: any) => item.id !== id)

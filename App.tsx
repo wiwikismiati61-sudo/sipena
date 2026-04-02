@@ -15,7 +15,7 @@ import Settings from './components/Settings';
 import Swal from 'sweetalert2';
 import { auth, db as firestoreDb } from './firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, collection, query, getDocs, writeBatch, getDocFromServer } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [db, setDbState] = useState<AppState>(DEFAULT_STATE);
@@ -28,43 +28,66 @@ const App: React.FC = () => {
   const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setIsLoggedIn(!!user);
       setCurrentUserEmail(user?.email || null);
       setIsAuthReady(true);
     });
-    return unsubscribe;
+
+    // Test connection to Firestore
+    const testConnection = async () => {
+      try {
+        await getDocFromServer(doc(firestoreDb, 'siswa', 'connection-test'));
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('the client is offline')) {
+          console.error("Please check your Firebase configuration. The client is offline.");
+        }
+      }
+    };
+    testConnection();
+
+    return unsubscribeAuth;
   }, []);
 
   useEffect(() => {
     if (!isAuthReady) return;
-    
-    const docRef = doc(firestoreDb, 'schoolData', 'main');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as AppState;
-        setDbState({ ...DEFAULT_STATE, ...data });
-      } else {
-        // Initialize with default state if not exists
-        if (isLoggedIn) {
-          setDoc(docRef, DEFAULT_STATE).catch(console.error);
-        }
-      }
-    }, (error) => {
-      console.error("Firestore Error: ", error);
+
+    const collections = ['siswa', 'guru', 'buku', 'transaksi', 'kunjungan', 'kunjunganSiswa', 'mapel', 'jam'];
+    const unsubscribes = collections.map(colName => {
+      return onSnapshot(collection(firestoreDb, colName), (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setDbState(prev => ({ ...prev, [colName]: data }));
+      }, (error) => {
+        console.error(`Firestore Error in ${colName}: `, error);
+      });
     });
 
-    return unsubscribe;
-  }, [isAuthReady, isLoggedIn]);
+    return () => unsubscribes.forEach(unsub => unsub());
+  }, [isAuthReady]);
 
   const setDb = useCallback((action: React.SetStateAction<AppState>) => {
     setDbState(prev => {
       const nextState = typeof action === 'function' ? action(prev) : action;
+      
       if (isLoggedIn) {
-        const docRef = doc(firestoreDb, 'schoolData', 'main');
-        setDoc(docRef, nextState).catch(err => {
-          console.error("Error writing to Firestore:", err);
-          Swal.fire('Error', 'Gagal menyimpan data ke database', 'error');
+        // Sync changes to Firestore
+        const collections: (keyof AppState)[] = ['siswa', 'guru', 'buku', 'transaksi', 'kunjungan', 'kunjunganSiswa', 'mapel', 'jam'];
+        
+        collections.forEach(colName => {
+          const nextCol = nextState[colName];
+          const prevCol = prev[colName];
+          
+          if (Array.isArray(nextCol) && Array.isArray(prevCol) && nextCol !== prevCol) {
+            // Find what changed
+            nextCol.forEach(item => {
+              if (item && item.id) {
+                const prevItem = prevCol.find(p => p.id === item.id);
+                if (!prevItem || JSON.stringify(prevItem) !== JSON.stringify(item)) {
+                  setDoc(doc(firestoreDb, colName as string, String(item.id)), item).catch(console.error);
+                }
+              }
+            });
+          }
         });
       }
       return nextState;

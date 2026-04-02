@@ -1,31 +1,92 @@
-rules_version = '2';
 
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: siswa
+// Fields: id, nama, kelas
+//
+// Collection: guru
+// Fields: id, nama
+//
+// Collection: buku
+// Fields: id, no, judul, jenis, edisi, isbn_issn, penerbit, tahun, kolasi, judul_seri, nomor_panggil, bahasa_buku, kota_terbit, nomor_kelas, catatan, penanggung_jawab, pengarang, subjek, kode_eksemplar
+//
+// Collection: transaksi
+// Fields: id, tglPinjam, jam, siswa, kelas, buku, subjek, kode_eksemplar, jenis, pengarang, penerbit, tglKembali, status, tglDikembalikan
+//
+// Collection: kunjungan
+// Fields: id, tgl, kelas, guru, mapel, jam
+//
+// Collection: kunjunganSiswa
+// Fields: id, tgl, jam, kelas, nama, keperluan
+//
+// Collection: mapel
+// Fields: id, nama
+//
+// Collection: jam
+// Fields: id, nama
+//
+// ===============================================================
+
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // ===============================================================
     // Helper Functions
+    // ===============================================================
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-          request.auth.token.email == "wiwikismiati61@guru.smp.belajar.id");
+      return isAuthenticated() && 
+        (request.auth.token.email == "wiwikismiati61@guru.smp.belajar.id" && request.auth.token.email_verified == true);
     }
 
-    // Allow all authenticated users to read and write library data
-    match /schoolData/{document=**} {
-      allow read: if true;
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /siswa/{siswaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /guru/{guruId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /buku/{bukuId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /transaksi/{transaksiId} {
+      allow read: if isAuthenticated();
       allow write: if isAuthenticated();
     }
-    
-    // Users collection
-    match /users/{userId} {
+
+    match /kunjungan/{kunjunganId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow write: if isAuthenticated();
+    }
+
+    match /kunjunganSiswa/{kunjunganSiswaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    match /mapel/{mapelId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /jam/{jamId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }

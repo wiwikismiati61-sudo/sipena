@@ -16,20 +16,22 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
   const activeLoans = db.transaksi.filter(t => t.status === TransactionStatus.BORROWED);
   const returnedLoans = db.transaksi.filter(t => t.status === TransactionStatus.RETURNED);
   
-  const totalJamKunjungan = db.kunjungan.reduce((acc, curr) => acc + (curr.jam ? curr.jam.split(',').length : 0), 0);
-  const uniqueKelasKunjungan = new Set(db.kunjungan.map(k => k.kelas)).size;
+  const totalJamKunjungan = db.kunjungan.reduce((acc, curr) => acc + (curr.jam ? String(curr.jam).split(',').length : 0), 0);
+  const uniqueKelasKunjungan = new Set(db.kunjungan.map(k => k.kelas || '')).size;
   const totalSiswaVisits = (db.kunjunganSiswa || []).length;
 
   const borrowerCount: Record<string, number> = {};
-  db.transaksi.forEach(t => { borrowerCount[t.siswa] = (borrowerCount[t.siswa] || 0) + 1; });
+  db.transaksi.forEach(t => { 
+    if (t.siswa) borrowerCount[t.siswa] = (borrowerCount[t.siswa] || 0) + 1; 
+  });
   const sortedBorrowers = Object.entries(borrowerCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const overdueList = activeLoans.filter(t => new Date(t.tglKembali) < today);
-  const uniqueOverdueStudents = new Set(overdueList.map(t => t.siswa)).size;
+  const overdueList = activeLoans.filter(t => t.tglKembali && new Date(t.tglKembali) < today);
+  const uniqueOverdueStudents = new Set(overdueList.map(t => t.siswa || '')).size;
 
-  const uniqueBorrowers = new Set(db.transaksi.map(t => t.siswa)).size;
+  const uniqueBorrowers = new Set(db.transaksi.map(t => t.siswa || '')).size;
   const percentage = db.siswa.length > 0 ? ((uniqueBorrowers / db.siswa.length) * 100).toFixed(1) : '0';
 
   const exportTopBorrowers = () => {
@@ -46,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
 
   const exportOverdue = () => {
     if (overdueList.length === 0) return Swal.fire('Info', 'Tidak ada keterlambatan', 'info');
-    const data = overdueList.map(t => ({ 'Nama Siswa': t.siswa, 'Kelas': t.kelas, 'Buku': t.buku, 'Jatuh Tempo': t.tglKembali }));
+    const data = overdueList.map(t => ({ 'Nama Siswa': t.siswa || '-', 'Kelas': t.kelas || '-', 'Buku': t.buku || '-', 'Jatuh Tempo': t.tglKembali || '-' }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Jatuh Tempo');
@@ -55,22 +57,23 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
 
   const stats = [
     { label: 'Total Siswa', value: db.siswa.length, icon: Users, color: 'blue' },
+    { label: 'Total Buku', value: db.buku.length, icon: BookOpen, color: 'emerald' },
     { label: 'Total Guru', value: db.guru.length, icon: UserCheck, color: 'purple' },
     { label: 'Kunjungan Kelas', value: `${totalJamKunjungan} Jam`, sub: `${uniqueKelasKunjungan} Kelas`, icon: Users, color: 'teal' },
     { label: 'Kunjungan Siswa', value: totalSiswaVisits, icon: UserSquare, color: 'pink' },
-    { label: 'Dipinjam', value: activeLoans.length, sub: `${new Set(activeLoans.map(t => t.siswa)).size} Siswa`, icon: BookOpen, color: 'orange' },
+    { label: 'Dipinjam', value: activeLoans.length, sub: `${new Set(activeLoans.map(t => t.siswa || '')).size} Siswa`, icon: BookOpen, color: 'orange' },
     { label: 'Partisipasi', value: `${percentage}%`, icon: PieChart, color: 'indigo' },
   ];
 
   const filteredTransactions = db.transaksi.filter(t => {
-    const matchKelas = t.kelas.toLowerCase().includes(filterKelas.toLowerCase());
-    const matchNama = t.siswa.toLowerCase().includes(filterNama.toLowerCase());
+    const matchKelas = (t.kelas || '').toLowerCase().includes(filterKelas.toLowerCase());
+    const matchNama = (t.siswa || '').toLowerCase().includes(filterNama.toLowerCase());
     return matchKelas && matchNama;
-  }).sort((a, b) => new Date(b.tglPinjam).getTime() - new Date(a.tglPinjam).getTime());
+  }).sort((a, b) => new Date(b.tglPinjam || 0).getTime() - new Date(a.tglPinjam || 0).getTime());
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {stats.map((s, idx) => (
           <div key={idx} className={`bg-white p-3 md:p-4 rounded-xl shadow-sm border-l-4 border-${s.color}-500`}>
             <div className="flex justify-between items-start">

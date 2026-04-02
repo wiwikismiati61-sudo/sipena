@@ -14,13 +14,13 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
   const [filterSiswa, setFilterSiswa] = useState('');
 
   const uniqueBorrowers = useMemo(() => {
-    return [...new Set(db.transaksi.map(t => t.siswa))].sort();
+    return [...new Set(db.transaksi.map(t => t.siswa || ''))].filter(Boolean).sort();
   }, [db.transaksi]);
 
   const filteredHistory = useMemo(() => {
     return db.transaksi
       .filter(t => !filterSiswa || t.siswa === filterSiswa)
-      .sort((a, b) => b.id.localeCompare(a.id));
+      .sort((a, b) => (b.id || '').localeCompare(a.id || ''));
   }, [db.transaksi, filterSiswa]);
 
   const exportGeneral = (type: 'pinjam' | 'kembali') => {
@@ -56,8 +56,8 @@ const Reports: React.FC<ReportsProps> = ({ db, setDb }) => {
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, filterSiswa);
-    XLSX.writeFile(wb, `Riwayat_${filterSiswa.replace(/\s+/g, '_')}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, filterSiswa.substring(0, 31));
+    XLSX.writeFile(wb, `Riwayat_${(filterSiswa || 'Siswa').replace(/\s+/g, '_')}.xlsx`);
   };
 
   const deleteTransaction = (id: string) => {

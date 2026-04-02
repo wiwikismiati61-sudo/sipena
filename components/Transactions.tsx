@@ -40,10 +40,10 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       loans = loans.filter(t => 
-        t.siswa.toLowerCase().includes(q) || 
-        t.buku.toLowerCase().includes(q) || 
-        t.kode_eksemplar.toLowerCase().includes(q) ||
-        t.kelas.toLowerCase().includes(q)
+        (t.siswa || '').toLowerCase().includes(q) || 
+        (t.buku || '').toLowerCase().includes(q) || 
+        (t.kode_eksemplar || '').toLowerCase().includes(q) ||
+        (t.kelas || '').toLowerCase().includes(q)
       );
     }
     return loans;
