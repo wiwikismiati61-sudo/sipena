@@ -2,11 +2,24 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, query, where, deleteDoc, getDocFromServer } from 'firebase/firestore';
-import firebaseConfig from './firebase-applet-config.json';
+import firebaseConfigData from './firebase-applet-config.json';
+
+// Support for environment variables (useful for Vercel/Production)
+const env = (import.meta as any).env || {};
+const firebaseConfig = {
+  apiKey: env.VITE_FIREBASE_API_KEY || firebaseConfigData.apiKey,
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || firebaseConfigData.authDomain,
+  projectId: env.VITE_FIREBASE_PROJECT_ID || firebaseConfigData.projectId,
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || firebaseConfigData.storageBucket,
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || firebaseConfigData.messagingSenderId,
+  appId: env.VITE_FIREBASE_APP_ID || firebaseConfigData.appId,
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || firebaseConfigData.measurementId,
+  firestoreDatabaseId: env.VITE_FIREBASE_DATABASE_ID || firebaseConfigData.firestoreDatabaseId
+};
 
 // Initialize Firebase SDK
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

@@ -15,7 +15,7 @@ import Settings from './components/Settings';
 import Swal from 'sweetalert2';
 import { auth, db as firestoreDb } from './firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, onSnapshot, collection, query, getDocs, writeBatch, getDocFromServer } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, collection, query, getDocs, writeBatch, getDocFromServer, deleteDoc } from 'firebase/firestore';
 
 const App: React.FC = () => {
   const [db, setDbState] = useState<AppState>(DEFAULT_STATE);
@@ -78,13 +78,20 @@ const App: React.FC = () => {
           const prevCol = prev[colName];
           
           if (Array.isArray(nextCol) && Array.isArray(prevCol) && nextCol !== prevCol) {
-            // Find what changed
+            // Find what changed (added or updated)
             nextCol.forEach(item => {
               if (item && item.id) {
                 const prevItem = prevCol.find(p => p.id === item.id);
                 if (!prevItem || JSON.stringify(prevItem) !== JSON.stringify(item)) {
                   setDoc(doc(firestoreDb, colName as string, String(item.id)), item).catch(console.error);
                 }
+              }
+            });
+
+            // Find what was deleted
+            prevCol.forEach(item => {
+              if (item && item.id && !nextCol.find(n => n.id === item.id)) {
+                deleteDoc(doc(firestoreDb, colName as string, String(item.id))).catch(console.error);
               }
             });
           }
