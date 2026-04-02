@@ -15,35 +15,74 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
   const [bukuForm, setBukuForm] = useState<Partial<Book>>({ jenis: BookType.UMUM });
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
 
-  const handleImport = (type: 'siswa' | 'guru' | 'mapel', file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+  const handleImport = (type: 'siswa' | 'guru' | 'mapel' | 'buku', file: File) => {
+    Swal.fire({
+      title: 'Konfirmasi Import',
+      text: `Import ini akan MENGHAPUS SEMUA DATA ${type.toUpperCase()} yang ada saat ini dan menggantinya dengan data dari Excel. Lanjutkan?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Tindih Data!',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
 
-      if (type === 'siswa') {
-        const newData: Student[] = json.slice(1)
-          .filter(row => row[0] && row[1])
-          .map((row, i) => ({ id: `S-${Date.now()}-${i}`, nama: String(row[0]), kelas: String(row[1]) }));
-        setDb(prev => ({ ...prev, siswa: newData }));
-        Swal.fire('Import Berhasil', `${newData.length} siswa baru diimpor.`, 'success');
-      } else if (type === 'guru') {
-        const newData: Teacher[] = json.slice(1)
-          .filter(row => row[0])
-          .map((row, i) => ({ id: `G-${Date.now()}-${i}`, nama: String(row[0]) }));
-        setDb(prev => ({ ...prev, guru: newData }));
-        Swal.fire('Import Berhasil', `${newData.length} guru baru diimpor.`, 'success');
-      } else if (type === 'mapel') {
-        const newData: Subject[] = json.slice(1)
-          .filter(row => row[0])
-          .map((row, i) => ({ id: `M-${Date.now()}-${i}`, nama: String(row[0]) }));
-        setDb(prev => ({ ...prev, mapel: newData }));
-        Swal.fire('Import Berhasil', `${newData.length} mapel baru diimpor.`, 'success');
+          if (type === 'siswa') {
+            const newData: Student[] = json.slice(1)
+              .filter(row => row[0] && row[1])
+              .map((row, i) => ({ id: `S-${Date.now()}-${i}`, nama: String(row[0]), kelas: String(row[1]) }));
+            setDb(prev => ({ ...prev, siswa: newData }));
+            Swal.fire('Import Berhasil', `${newData.length} siswa diimpor (data lama dihapus).`, 'success');
+          } else if (type === 'guru') {
+            const newData: Teacher[] = json.slice(1)
+              .filter(row => row[0])
+              .map((row, i) => ({ id: `G-${Date.now()}-${i}`, nama: String(row[0]) }));
+            setDb(prev => ({ ...prev, guru: newData }));
+            Swal.fire('Import Berhasil', `${newData.length} guru diimpor (data lama dihapus).`, 'success');
+          } else if (type === 'mapel') {
+            const newData: Subject[] = json.slice(1)
+              .filter(row => row[0])
+              .map((row, i) => ({ id: `M-${Date.now()}-${i}`, nama: String(row[0]) }));
+            setDb(prev => ({ ...prev, mapel: newData }));
+            Swal.fire('Import Berhasil', `${newData.length} mapel diimpor (data lama dihapus).`, 'success');
+          } else if (type === 'buku') {
+            const newData: Book[] = json.slice(1)
+              .filter(row => row[0]) // Judul must exist
+              .map((row, i) => ({
+                id: `B-${Date.now()}-${i}`,
+                no: i + 1,
+                judul: String(row[0] || ''),
+                jenis: String(row[1] || ''),
+                edisi: String(row[2] || ''),
+                isbn_issn: String(row[3] || ''),
+                penerbit: String(row[4] || ''),
+                tahun: String(row[5] || ''),
+                kolasi: String(row[6] || ''),
+                judul_seri: String(row[7] || ''),
+                nomor_panggil: String(row[8] || ''),
+                bahasa_buku: String(row[9] || ''),
+                kota_terbit: String(row[10] || ''),
+                nomor_kelas: String(row[11] || ''),
+                catatan: String(row[12] || ''),
+                penanggung_jawab: String(row[13] || ''),
+                pengarang: String(row[14] || ''),
+                subjek: String(row[15] || ''),
+                kode_eksemplar: String(row[16] || ''),
+              }));
+            setDb(prev => ({ ...prev, buku: newData }));
+            Swal.fire('Import Berhasil', `${newData.length} buku diimpor (data lama dihapus).`, 'success');
+          }
+        };
+        reader.readAsArrayBuffer(file);
       }
-    };
-    reader.readAsArrayBuffer(file);
+    });
   };
 
   const addStudentManual = () => {
@@ -79,7 +118,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
 
   const handleBukuSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bukuForm.judul || !bukuForm.pengarang || !bukuForm.penerbit) return;
+    if (!bukuForm.judul) return;
     
     if (editingBookId) {
       setDb(prev => ({
@@ -88,9 +127,10 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
       }));
       Swal.fire('Sukses', 'Buku berhasil diperbarui', 'success');
     } else {
+      const nextNo = db.buku.length > 0 ? Math.max(...db.buku.map(b => b.no || 0)) + 1 : 1;
       setDb(prev => ({
         ...prev,
-        buku: [...prev.buku, { ...bukuForm, id: `B-${Date.now()}` } as Book]
+        buku: [...prev.buku, { ...bukuForm, id: `B-${Date.now()}`, no: nextNo } as Book]
       }));
       Swal.fire('Sukses', 'Buku berhasil ditambahkan', 'success');
     }
@@ -181,23 +221,20 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
         {activeSection === 'buku' && (
           <div className="space-y-6">
             <form id="book-form-section" onSubmit={handleBukuSubmit} className="bg-slate-50 p-4 md:p-6 rounded-xl border">
-              <h4 className="font-bold text-slate-800 mb-4 col-span-full">
-                {editingBookId ? `Mengedit Buku: ${bukuForm.judul}` : 'Tambah Buku Baru'}
-              </h4>
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-bold text-slate-800">
+                  {editingBookId ? `Mengedit Buku: ${bukuForm.judul}` : 'Tambah Buku Baru'}
+                </h4>
+                <div className="flex gap-2">
+                  <label className="cursor-pointer bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shadow">
+                    <Upload size={14} /> IMPORT EXCEL
+                    <input type="file" className="hidden" accept=".xlsx,.xls" onChange={(e) => e.target.files && handleImport('buku', e.target.files[0])} />
+                  </label>
+                </div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="md:col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jenis Buku</label>
-                  <select 
-                    value={bukuForm.jenis}
-                    onChange={(e) => setBukuForm({ ...bukuForm, jenis: e.target.value as BookType })}
-                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value={BookType.UMUM}>Buku Umum/Fiksi</option>
-                    <option value={BookType.WAJIB}>Buku Paket (Wajib)</option>
-                  </select>
-                </div>
-                <div className="md:col-span-1">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Judul / Mapel</label>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Judul Buku</label>
                   <input 
                     type="text" 
                     value={bukuForm.judul || ''}
@@ -207,15 +244,34 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengarang</label>
+                <div className="md:col-span-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jenis Buku</label>
                   <input 
                     type="text" 
-                    value={bukuForm.pengarang || ''}
-                    onChange={(e) => setBukuForm({ ...bukuForm, pengarang: e.target.value })}
-                    placeholder="Nama Pengarang"
+                    value={bukuForm.jenis || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, jenis: e.target.value })}
+                    placeholder="Jenis Buku"
                     className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Edisi</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.edisi || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, edisi: e.target.value })}
+                    placeholder="Edisi"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">ISBN / ISSN</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.isbn_issn || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, isbn_issn: e.target.value })}
+                    placeholder="ISBN / ISSN"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div>
@@ -226,7 +282,126 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                     onChange={(e) => setBukuForm({ ...bukuForm, penerbit: e.target.value })}
                     placeholder="Penerbit"
                     className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tahun</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.tahun || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, tahun: e.target.value })}
+                    placeholder="Tahun"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kolasi</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.kolasi || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, kolasi: e.target.value })}
+                    placeholder="Kolasi"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Judul Seri</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.judul_seri || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, judul_seri: e.target.value })}
+                    placeholder="Judul Seri"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nomor Panggil</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.nomor_panggil || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, nomor_panggil: e.target.value })}
+                    placeholder="Nomor Panggil"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Bahasa Buku</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.bahasa_buku || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, bahasa_buku: e.target.value })}
+                    placeholder="Bahasa Buku"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kota Terbit</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.kota_terbit || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, kota_terbit: e.target.value })}
+                    placeholder="Kota Terbit"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nomor Kelas</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.nomor_kelas || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, nomor_kelas: e.target.value })}
+                    placeholder="Nomor Kelas"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Catatan</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.catatan || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, catatan: e.target.value })}
+                    placeholder="Catatan"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Penanggung Jawab</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.penanggung_jawab || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, penanggung_jawab: e.target.value })}
+                    placeholder="Penanggung Jawab"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengarang</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.pengarang || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, pengarang: e.target.value })}
+                    placeholder="Nama Pengarang"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Subjek</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.subjek || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, subjek: e.target.value })}
+                    placeholder="Subjek"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kode Eksemplar</label>
+                  <input 
+                    type="text" 
+                    value={bukuForm.kode_eksemplar || ''}
+                    onChange={(e) => setBukuForm({ ...bukuForm, kode_eksemplar: e.target.value })}
+                    placeholder="Kode Eksemplar"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div className="lg:col-span-4 flex justify-end items-center gap-2 mt-2">
@@ -243,28 +418,52 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
             </form>
 
             <div className="overflow-x-auto border rounded-lg max-h-[400px] w-full">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold">
+              <table className="w-full text-sm text-left border-collapse">
+                <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold z-10">
                   <tr>
-                    <th className="px-3 py-2.5">Jenis</th>
-                    <th className="px-3 py-2.5">Judul</th>
-                    <th className="px-3 py-2.5">Pengarang</th>
-                    <th className="px-3 py-2.5">Penerbit</th>
-                    <th className="px-3 py-2.5 text-center">Aksi</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">No</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Judul</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Jenis</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Edisi</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">ISBN/ISSN</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Penerbit</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Tahun</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Kolasi</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Judul Seri</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">No Panggil</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Bahasa</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Kota Terbit</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">No Kelas</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Catatan</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Penanggung Jawab</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Pengarang</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Subjek</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Kode Eksemplar</th>
+                    <th className="px-3 py-2.5 border-b text-center sticky right-0 bg-slate-50 z-20">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {db.buku.map(b => (
                     <tr key={b.id} className="hover:bg-slate-50">
-                      <td className="px-3 py-2.5">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${b.jenis === BookType.WAJIB ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {b.jenis}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 font-medium text-slate-700">{b.judul}</td>
-                      <td className="px-3 py-2.5 text-slate-500">{b.pengarang}</td>
-                      <td className="px-3 py-2.5 text-slate-500">{b.penerbit}</td>
-                      <td className="px-3 py-2.5 text-center">
+                      <td className="px-3 py-2.5 font-bold text-slate-400 whitespace-nowrap">{b.no}</td>
+                      <td className="px-3 py-2.5 font-medium text-slate-700 min-w-[200px]">{b.judul}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.jenis}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.edisi}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.isbn_issn}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.penerbit}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.tahun}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.kolasi}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.judul_seri}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.nomor_panggil}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.bahasa_buku}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.kota_terbit}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.nomor_kelas}</td>
+                      <td className="px-3 py-2.5 text-slate-500 min-w-[150px]">{b.catatan}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.penanggung_jawab}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.pengarang}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.subjek}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.kode_eksemplar}</td>
+                      <td className="px-3 py-2.5 text-center sticky right-0 bg-white shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.05)] group-hover:bg-slate-50">
                         <div className="flex justify-center gap-2">
                           <button onClick={() => handleEditBook(b)} className="text-blue-500 hover:text-blue-700 p-1"><Edit size={16} /></button>
                           <button onClick={() => deleteItem('buku', b.id)} className="text-red-500 hover:text-red-700 p-1"><Trash2 size={16} /></button>

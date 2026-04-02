@@ -42,12 +42,26 @@
       "description": "Represents a book in the library",
       "type": "object",
       "properties": {
-        "jenis": { "type": "string", "enum": ["Wajib", "Umum"], "description": "Type of book" },
+        "no": { "type": "integer", "description": "Automatic sequence number" },
         "judul": { "type": "string", "description": "Book title" },
+        "jenis": { "type": "string", "description": "Type of book" },
+        "edisi": { "type": "string", "description": "Book edition" },
+        "isbn_issn": { "type": "string", "description": "ISBN or ISSN number" },
+        "penerbit": { "type": "string", "description": "Book publisher" },
+        "tahun": { "type": "string", "description": "Year of publication" },
+        "kolasi": { "type": "string", "description": "Collation (physical description)" },
+        "judul_seri": { "type": "string", "description": "Series title" },
+        "nomor_panggil": { "type": "string", "description": "Call number" },
+        "bahasa_buku": { "type": "string", "description": "Book language" },
+        "kota_terbit": { "type": "string", "description": "City of publication" },
+        "nomor_kelas": { "type": "string", "description": "Class number (DDC)" },
+        "catatan": { "type": "string", "description": "Notes" },
+        "penanggung_jawab": { "type": "string", "description": "Person in charge" },
         "pengarang": { "type": "string", "description": "Book author" },
-        "penerbit": { "type": "string", "description": "Book publisher" }
+        "subjek": { "type": "string", "description": "Subject" },
+        "kode_eksemplar": { "type": "string", "description": "Exemplar code" }
       },
-      "required": ["jenis", "judul", "pengarang", "penerbit"]
+      "required": ["judul"]
     },
     "Transaction": {
       "title": "Transaction",

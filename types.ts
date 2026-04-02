@@ -32,10 +32,24 @@ export interface LessonHour {
 
 export interface Book {
   id: string;
-  jenis: BookType;
+  no: number;
   judul: string;
-  pengarang: string;
+  jenis: string;
+  edisi: string;
+  isbn_issn: string;
   penerbit: string;
+  tahun: string;
+  kolasi: string;
+  judul_seri: string;
+  nomor_panggil: string;
+  bahasa_buku: string;
+  kota_terbit: string;
+  nomor_kelas: string;
+  catatan: string;
+  penanggung_jawab: string;
+  pengarang: string;
+  subjek: string;
+  kode_eksemplar: string;
 }
 
 export interface Transaction {
@@ -45,6 +59,8 @@ export interface Transaction {
   siswa: string;
   kelas: string;
   buku: string;
+  subjek: string;
+  kode_eksemplar: string;
   jenis: BookType;
   pengarang: string;
   penerbit: string;
