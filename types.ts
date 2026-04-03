@@ -50,6 +50,7 @@ export interface Book {
   pengarang: string;
   subjek: string;
   kode_eksemplar: string;
+  stok: number;
 }
 
 export interface Transaction {
@@ -59,6 +60,7 @@ export interface Transaction {
   siswa: string;
   kelas: string;
   buku: string;
+  bookId?: string;
   subjek: string;
   kode_eksemplar: string;
   jenis: BookType;
@@ -67,6 +69,7 @@ export interface Transaction {
   tglKembali: string;
   status: TransactionStatus;
   tglDikembalikan: string;
+  jmlEksemplar: number;
 }
 
 export interface Visit {

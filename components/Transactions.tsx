@@ -14,6 +14,8 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
   const [selectedSiswa, setSelectedSiswa] = useState('');
   const [selectedSubjek, setSelectedSubjek] = useState('');
   const [selectedBookId, setSelectedBookId] = useState('');
+  const [jmlEksemplar, setJmlEksemplar] = useState(1);
+  const [selectedJenis, setSelectedJenis] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(null);
   
@@ -60,21 +62,31 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
 
     const b = db.buku.find(x => x.id === selectedBookId)!;
     
+    if (b.stok < jmlEksemplar && !editingTransactionId) {
+      return Swal.fire('Error', `Stok buku tidak mencukupi. Tersisa: ${b.stok}`, 'error');
+    }
+
     if (editingTransactionId) {
+      const oldTx = db.transaksi.find(t => t.id === editingTransactionId);
+      const diff = jmlEksemplar - (oldTx?.jmlEksemplar || 0);
+
       setDb(prev => ({
         ...prev,
+        buku: prev.buku.map(book => book.id === selectedBookId ? { ...book, stok: (book.stok || 0) - diff } : book),
         transaksi: prev.transaksi.map(t => t.id === editingTransactionId ? {
           ...t,
           tglPinjam: dates.pinjam,
           siswa: selectedSiswa,
           kelas: selectedKelas,
           buku: b.judul,
+          bookId: b.id,
           subjek: b.subjek,
           kode_eksemplar: b.kode_eksemplar,
-          jenis: b.jenis as any,
+          jenis: selectedJenis as any,
           pengarang: b.pengarang,
           penerbit: b.penerbit,
           tglKembali: dates.kembali,
+          jmlEksemplar: jmlEksemplar,
         } : t)
       }));
       setEditingTransactionId(null);
@@ -87,17 +99,23 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
         siswa: selectedSiswa,
         kelas: selectedKelas,
         buku: b.judul,
+        bookId: b.id,
         subjek: b.subjek,
         kode_eksemplar: b.kode_eksemplar,
-        jenis: b.jenis as any,
+        jenis: selectedJenis as any,
         pengarang: b.pengarang,
         penerbit: b.penerbit,
         tglKembali: dates.kembali,
         status: TransactionStatus.BORROWED,
-        tglDikembalikan: '-'
+        tglDikembalikan: '-',
+        jmlEksemplar: jmlEksemplar
       });
 
-      setDb(prev => ({ ...prev, transaksi: [...prev.transaksi, ...newTransactions] }));
+      setDb(prev => ({ 
+        ...prev, 
+        buku: prev.buku.map(book => book.id === selectedBookId ? { ...book, stok: (book.stok || 0) - jmlEksemplar } : book),
+        transaksi: [...prev.transaksi, ...newTransactions] 
+      }));
       Swal.fire('Berhasil', `Buku "${b.judul}" berhasil dipinjam`, 'success');
     }
     
@@ -105,6 +123,8 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
     setSelectedSubjek('');
     setSelectedSiswa('');
     setSelectedKelas('');
+    setJmlEksemplar(1);
+    setSelectedJenis('');
   };
 
   const handleEditTransaction = (t: Transaction) => {
@@ -116,6 +136,8 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
     // Find book by title and subject to set selectedBookId
     const book = db.buku.find(b => b.judul === t.buku && (b.subjek || 'Umum') === (t.subjek || 'Umum'));
     if (book) setSelectedBookId(book.id);
+    setJmlEksemplar(t.jmlEksemplar || 1);
+    setSelectedJenis(t.jenis || '');
     
     setDates({
       pinjam: t.tglPinjam,
@@ -150,6 +172,8 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
     setSelectedSiswa('');
     setSelectedSubjek('');
     setSelectedBookId('');
+    setJmlEksemplar(1);
+    setSelectedJenis('');
     setDates({
       pinjam: new Date().toISOString().split('T')[0],
       kembali: (() => {
@@ -227,7 +251,11 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                   <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Pilih Judul Buku</label>
                   <select 
                     value={selectedBookId} 
-                    onChange={(e) => setSelectedBookId(e.target.value)}
+                    onChange={(e) => {
+                      const b = db.buku.find(x => x.id === e.target.value);
+                      setSelectedBookId(e.target.value);
+                      if (b) setSelectedJenis(b.jenis);
+                    }}
                     disabled={!selectedSubjek}
                     className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                     required
@@ -235,10 +263,36 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                     <option value="">-- Judul Buku --</option>
                     {booksInSubjek.map(b => (
                       <option key={b.id} value={b.id}>
-                        {b.subjek || 'Umum'} ; {b.judul} ({b.kode_eksemplar})
+                        {b.subjek || 'Umum'} ; {b.judul} ({b.kode_eksemplar}) - Stok: {b.stok || 0}
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Jenis Buku</label>
+                    <select 
+                      value={selectedJenis} 
+                      onChange={(e) => setSelectedJenis(e.target.value)}
+                      className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                      required
+                    >
+                      <option value="">-- Jenis --</option>
+                      {db.mapel.map(m => <option key={m.id} value={m.nama}>{m.nama}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Jml Eksemplar</label>
+                    <input 
+                      type="number" 
+                      value={jmlEksemplar} 
+                      onChange={(e) => setJmlEksemplar(Number(e.target.value))}
+                      className="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                      min="1"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -287,6 +341,7 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                 <th className="px-3 py-2.5">Siswa</th>
                 <th className="px-3 py-2.5">Subjek</th>
                 <th className="px-3 py-2.5">Buku</th>
+                <th className="px-3 py-2.5 text-center">Jml</th>
                 <th className="px-3 py-2.5">Penerbit</th>
                 <th className="px-3 py-2.5">Jatuh Tempo</th>
                 <th className="px-3 py-2.5 text-center">Aksi</th>
@@ -311,6 +366,9 @@ const Transactions: React.FC<TransactionsProps> = ({ db, setDb }) => {
                     <td className="px-3 py-2.5">
                       <div className="font-medium text-slate-800">{t.buku}</div>
                       <div className="text-[10px] text-slate-400 italic">Oleh {t.pengarang}</div>
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-bold text-blue-600">
+                      {t.jmlEksemplar || 1}
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="text-xs text-slate-600">{t.penerbit}</div>

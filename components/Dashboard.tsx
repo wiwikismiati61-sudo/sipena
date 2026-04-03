@@ -19,6 +19,8 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
   const totalJamKunjungan = db.kunjungan.reduce((acc, curr) => acc + (curr.jam ? String(curr.jam).split(',').length : 0), 0);
   const uniqueKelasKunjungan = new Set(db.kunjungan.map(k => k.kelas || '')).size;
   const totalSiswaVisits = (db.kunjunganSiswa || []).length;
+  const totalBukuKoleksi = db.buku.filter(b => b.catatan && b.catatan.toLowerCase().includes('koleksi')).length;
+  const totalBukuCopies = db.buku.reduce((acc, curr) => acc + (Number(curr.stok) || 0), 0);
 
   const borrowerCount: Record<string, number> = {};
   db.transaksi.forEach(t => { 
@@ -57,8 +59,9 @@ const Dashboard: React.FC<DashboardProps> = ({ db }) => {
 
   const stats = [
     { label: 'Total Siswa', value: db.siswa.length, icon: Users, color: 'blue' },
-    { label: 'Total Buku', value: db.buku.length, icon: BookOpen, color: 'emerald' },
-    { label: 'Total Guru', value: db.guru.length, icon: UserCheck, color: 'purple' },
+    { label: 'Total Jenis Buku', value: db.buku.length, icon: BookOpen, color: 'emerald' },
+    { label: 'Total Buku', value: totalBukuCopies, icon: UserCheck, color: 'purple' },
+    { label: 'Buku Koleksi', value: totalBukuKoleksi, icon: BookOpen, color: 'rose' },
     { label: 'Kunjungan Kelas', value: `${totalJamKunjungan} Jam`, sub: `${uniqueKelasKunjungan} Kelas`, icon: Users, color: 'teal' },
     { label: 'Kunjungan Siswa', value: totalSiswaVisits, icon: UserSquare, color: 'pink' },
     { label: 'Dipinjam', value: activeLoans.length, sub: `${new Set(activeLoans.map(t => t.siswa || '')).size} Siswa`, icon: BookOpen, color: 'orange' },

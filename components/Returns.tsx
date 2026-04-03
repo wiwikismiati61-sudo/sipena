@@ -69,14 +69,27 @@ const Returns: React.FC<ReturnsProps> = ({ db, setDb }) => {
     e.preventDefault();
     if (selectedIds.length === 0) return Swal.fire('Error', 'Centang minimal satu buku', 'error');
 
-    setDb(prev => ({
-      ...prev,
-      transaksi: prev.transaksi.map(t => 
-        selectedIds.includes(t.id) 
-        ? { ...t, status: TransactionStatus.RETURNED, tglDikembalikan: retDate } 
-        : t
-      )
-    }));
+    const returnedTxs = db.transaksi.filter(t => selectedIds.includes(t.id));
+    
+    setDb(prev => {
+      const updatedBuku = [...prev.buku];
+      returnedTxs.forEach(tx => {
+        const bookIdx = updatedBuku.findIndex(b => b.id === tx.bookId || (b.judul === tx.buku && b.subjek === tx.subjek));
+        if (bookIdx !== -1) {
+          updatedBuku[bookIdx] = { ...updatedBuku[bookIdx], stok: (updatedBuku[bookIdx].stok || 0) + (tx.jmlEksemplar || 1) };
+        }
+      });
+
+      return {
+        ...prev,
+        buku: updatedBuku,
+        transaksi: prev.transaksi.map(t => 
+          selectedIds.includes(t.id) 
+          ? { ...t, status: TransactionStatus.RETURNED, tglDikembalikan: retDate } 
+          : t
+        )
+      };
+    });
 
     setSelectedIds([]);
     Swal.fire('Berhasil', `${selectedIds.length} buku telah dikembalikan`, 'success');

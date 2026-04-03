@@ -12,8 +12,11 @@ interface MasterDataProps {
 
 const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
   const [activeSection, setActiveSection] = useState('siswa');
-  const [bukuForm, setBukuForm] = useState<Partial<Book>>({ jenis: BookType.UMUM });
+  const [bukuForm, setBukuForm] = useState<Partial<Book>>({ jenis: '', stok: 1 });
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
+
+  const years = Array.from({ length: 130 }, (_, i) => String(new Date().getFullYear() + 5 - i));
+  const exemplarCodes = Array.from({ length: 1000 }, (_, i) => String(i + 1));
 
   const handleImport = (type: 'siswa' | 'guru' | 'mapel' | 'buku', file: File) => {
     Swal.fire({
@@ -79,6 +82,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 pengarang: String(row[14] || ''),
                 subjek: String(row[15] || ''),
                 kode_eksemplar: String(row[16] || ''),
+                stok: Number(row[17] || 1),
               }));
             setDb(prev => ({ ...prev, buku: newData }));
             Swal.fire('Import Berhasil', `${newData.length} buku diimpor.`, 'success');
@@ -87,6 +91,41 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
         reader.readAsArrayBuffer(file);
       }
     });
+  };
+
+  const handleExportBuku = () => {
+    if (db.buku.length === 0) {
+      Swal.fire('Info', 'Tidak ada data buku untuk diekspor', 'info');
+      return;
+    }
+
+    const exportData = db.buku.map(b => ({
+      'No': b.no,
+      'Judul Buku': b.judul,
+      'Jenis Buku': b.jenis,
+      'Edisi': b.edisi,
+      'ISBN/ISSN': b.isbn_issn,
+      'Penerbit': b.penerbit,
+      'Tahun': b.tahun,
+      'Kolasi': b.kolasi,
+      'Judul Seri': b.judul_seri,
+      'Nomor Panggil': b.nomor_panggil,
+      'Bahasa Buku': b.bahasa_buku,
+      'Kota Terbit': b.kota_terbit,
+      'Nomor Kelas': b.nomor_kelas,
+      'Catatan': b.catatan,
+      'Penanggung Jawab': b.penanggung_jawab,
+      'Pengarang': b.pengarang,
+      'Subjek': b.subjek,
+      'Kode Eksemplar': b.kode_eksemplar,
+      'Stok': b.stok || 0
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Daftar Buku');
+    XLSX.writeFile(workbook, `Rekap_Buku_${new Date().toISOString().split('T')[0]}.xlsx`);
+    Swal.fire('Berhasil', 'Data buku berhasil diekspor ke Excel', 'success');
   };
 
   const addStudentManual = () => {
@@ -111,7 +150,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
 
   const cancelEdit = () => {
     setEditingBookId(null);
-    setBukuForm({ jenis: BookType.UMUM });
+    setBukuForm({ jenis: '', stok: 1 });
   };
 
   const handleEditBook = (book: Book) => {
@@ -200,7 +239,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto border rounded-lg max-h-[500px] w-full">
+            <div className="overflow-x-auto border rounded-lg max-h-[450px] w-full scrollbar-thin scrollbar-thumb-slate-200">
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold">
                   <tr>
@@ -235,6 +274,9 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                   {editingBookId ? `Mengedit Buku: ${bukuForm.judul}` : 'Tambah Buku Baru'}
                 </h4>
                 <div className="flex gap-2">
+                  <button onClick={handleExportBuku} className="bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shadow">
+                    <FileText size={14} /> REKAP EXCEL
+                  </button>
                   <label className="cursor-pointer bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shadow">
                     <Upload size={14} /> IMPORT EXCEL
                     <input type="file" className="hidden" accept=".xlsx,.xls" onChange={(e) => e.target.files && handleImport('buku', e.target.files[0])} />
@@ -255,13 +297,16 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </div>
                 <div className="md:col-span-1">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jenis Buku</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={bukuForm.jenis || ''}
                     onChange={(e) => setBukuForm({ ...bukuForm, jenis: e.target.value })}
-                    placeholder="Jenis Buku"
-                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Pilih Jenis (Mapel)</option>
+                    {db.mapel.map(m => (
+                      <option key={m.id} value={m.nama}>{m.nama}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Edisi</label>
@@ -295,13 +340,16 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tahun</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={bukuForm.tahun || ''}
                     onChange={(e) => setBukuForm({ ...bukuForm, tahun: e.target.value })}
-                    placeholder="Tahun"
-                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Pilih Tahun</option>
+                    {years.map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kolasi</label>
@@ -375,13 +423,16 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Penanggung Jawab</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={bukuForm.penanggung_jawab || ''}
                     onChange={(e) => setBukuForm({ ...bukuForm, penanggung_jawab: e.target.value })}
-                    placeholder="Penanggung Jawab"
-                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Pilih Penanggung Jawab (Guru)</option>
+                    {db.guru.map(g => (
+                      <option key={g.id} value={g.nama}>{g.nama}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Pengarang</label>
@@ -405,12 +456,26 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kode Eksemplar</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={bukuForm.kode_eksemplar || ''}
                     onChange={(e) => setBukuForm({ ...bukuForm, kode_eksemplar: e.target.value })}
-                    placeholder="Kode Eksemplar"
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Pilih Kode</option>
+                    {exemplarCodes.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Stok Eksemplar</label>
+                  <input 
+                    type="number" 
+                    value={bukuForm.stok || 0}
+                    onChange={(e) => setBukuForm({ ...bukuForm, stok: Number(e.target.value) })}
+                    placeholder="Stok"
                     className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    min="0"
                   />
                 </div>
                 <div className="lg:col-span-4 flex justify-end items-center gap-2 mt-2">
@@ -426,7 +491,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
               </div>
             </form>
 
-            <div className="overflow-x-auto border rounded-lg max-h-[400px] w-full">
+            <div className="overflow-x-auto border rounded-lg max-h-[450px] w-full scrollbar-thin scrollbar-thumb-slate-200">
               <table className="w-full text-sm text-left border-collapse">
                 <thead className="bg-slate-50 sticky top-0 text-slate-500 text-[10px] uppercase font-bold z-10">
                   <tr>
@@ -448,6 +513,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                     <th className="px-3 py-2.5 border-b whitespace-nowrap">Pengarang</th>
                     <th className="px-3 py-2.5 border-b whitespace-nowrap">Subjek</th>
                     <th className="px-3 py-2.5 border-b whitespace-nowrap">Kode Eksemplar</th>
+                    <th className="px-3 py-2.5 border-b whitespace-nowrap">Stok</th>
                     <th className="px-3 py-2.5 border-b text-center sticky right-0 bg-slate-50 z-20">Aksi</th>
                   </tr>
                 </thead>
@@ -472,6 +538,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                       <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.pengarang}</td>
                       <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.subjek}</td>
                       <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap">{b.kode_eksemplar}</td>
+                      <td className="px-3 py-2.5 text-slate-500 whitespace-nowrap font-bold">{b.stok || 0}</td>
                       <td className="px-3 py-2.5 text-center sticky right-0 bg-white shadow-[-4px_0_6px_-1px_rgba(0,0,0,0.05)] group-hover:bg-slate-50">
                         <div className="flex justify-center gap-2">
                           <button onClick={() => handleEditBook(b)} className="text-blue-500 hover:text-blue-700 p-1"><Edit size={16} /></button>
@@ -520,7 +587,7 @@ const MasterData: React.FC<MasterDataProps> = ({ db, setDb }) => {
                 </button>
               </div>
             </div>
-            <div className="overflow-x-auto border rounded-lg">
+            <div className="overflow-x-auto border rounded-lg max-h-[450px] w-full scrollbar-thin scrollbar-thumb-slate-200">
                <table className="w-full text-sm text-left">
                   <tbody className="divide-y">
                     {(db[activeSection as keyof AppState] as any[]).map(item => (
